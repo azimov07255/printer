@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a6b4f">
+<title>Kitobcha</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>Kitobcha</h1>
+  <p class="sub">PDF, Word, rasm yoki matn faylini tashlang. Kitobcha va boshqa chiqarish usullari uchun tayyor PDF olasiz. Hammasi qurilmangizda bajariladi, internet shart emas.</p>
+
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Fayllarni tanlash">
+    <strong>Fayllarni shu yerga tashlang</strong>
+    <span>yoki bosib tanlang · PDF, Word (.docx), JPG/PNG, .txt</span>
+    <input type="file" id="file" multiple accept=".pdf,.docx,.doc,.txt,.md,.csv,.jpg,.jpeg,.png,.webp,.gif,.bmp,application/pdf,image/*" class="hidden">
+  </div>
+
+  <div id="status" class="status hidden" role="status"></div>
+  <div id="msg"></div>
+
+  <div id="listCard" class="card hidden">
+    <h2>Fayllar <span class="muted" id="total"></span></h2>
+    <ul id="fileList" class="files"></ul>
+    <div class="hint">Bir nechta fayl tashlasangiz, ular ketma-ket bitta hujjatga birlashtiriladi. Tartibini ↑ ↓ bilan oʻzgartiring.</div>
+  </div>
+
+  <div id="settings" class="hidden">
+    <div class="card">
+      <h2>Qanday chiqaramiz</h2>
+      <label class="field">
+        <span class="lbl">Chiqarish usuli</span>
+        <select id="mode">
+          <option value="booklet2">Kitobcha — oddiy (bir tomonlama) printer, 2 fayl</option>
+          <option value="bookletDuplex">Kitobcha — avtomatik ikki tomonlama printer, 1 fayl</option>
+          <option value="oddeven">Oddiy chiqarish, ikki tomonlama (qoʻlda): toq va juft betlar</option>
+          <option value="nup2">Har varaqda 2 bet (qogʻoz tejash)</option>
+          <option value="nup4">Har varaqda 4 bet (qogʻoz tejash)</option>
+          <option value="extract">Faqat tanlangan betlarni PDF qilib olish</option>
+        </select>
+        <div class="hint" id="modeHint"></div>
+      </label>
+
+      <label class="field">
+        <span class="lbl">Qaysi betlar chiqarilsin</span>
+        <input type="text" id="range" autocomplete="off">
+        <div class="hint">Masalan: <code>1-169</code> yoki <code>1-10, 15-80</code>. Keraksiz betlarni shu yerda chiqarib tashlang.</div>
+      </label>
+
+      <div class="row">
+        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4">
+          <span class="lbl">Qogʻoz oʻlchami</span>
+          <select id="paper"><option>A4</option><option>A3</option><option>Letter</option></select>
+        </label>
+        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4">
+          <span class="lbl">Bet hajmi (%)</span>
+          <input type="number" id="scale" min="60" max="100" step="1">
+          <div class="hint">95 tavsiya: chetlar kesilmaydi.</div>
+        </label>
+        <label class="field" data-modes="booklet2 bookletDuplex">
+          <span class="lbl">Qismga boʻlish (varaq)</span>
+          <input type="number" id="section" min="0" step="1" placeholder="0">
+          <div class="hint">0 = bitta kitobcha. 11 desangiz, har 11 varaq alohida qism.</div>
+        </label>
+      </div>
+
+      <label class="check" data-modes="booklet2 bookletDuplex nup2 nup4"><input type="checkbox" id="rtl"><span>Oʻngdan chapga oʻqiladigan hujjat</span></label>
+      <label class="check" data-modes="nup2 nup4"><input type="checkbox" id="frame"><span>Betlar atrofiga ramka chizish</span></label>
+      <label class="check" data-modes="booklet2 oddeven"><input type="checkbox" id="rev"><span>Orqa tomon fayli teskari tartibda boʻlsin<br><span class="hint">Faqat sinovda orqa tomon varaqlari teskari chiqsa yoqing.</span></span></label>
+      <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
+    </div>
+
+    <div class="summary" id="summary"></div>
+    <div id="preview"></div>
+
+    <div class="card">
+      <h2>Tayyor fayllar</h2>
+      <div class="btns" id="outputs"></div>
+    </div>
+
+    <div class="card">
+      <h2>Chiqarish tartibi</h2>
+      <ol id="steps"></ol>
+    </div>
+  </div>
+
+  <footer>
+    <span id="offline">Oflayn rejim tekshirilmoqda…</span>
+    <button id="install" class="link hidden">Ilova sifatida oʻrnatish</button>
+  </footer>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/mammoth.browser.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/convert.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
