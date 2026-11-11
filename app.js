@@ -9,6 +9,8 @@
     settings: $("settings"), mode: $("mode"), modeHint: $("modeHint"), range: $("range"),
     paper: $("paper"), scale: $("scale"), section: $("section"),
     rtl: $("rtl"), frame: $("frame"), rev: $("rev"), test: $("test"),
+    margin: $("margin"), crop: $("crop"), rotate: $("rotate"), angle: $("angle"),
+    pageNum: $("pageNum"), numStart: $("numStart"), gray: $("gray"), previewBtn: $("previewBtn"), previewOut: $("previewOut"),
     summary: $("summary"), preview: $("preview"), outputs: $("outputs"), steps: $("steps")
   };
 
@@ -24,6 +26,12 @@
   el.rtl.checked = load("rtl", "0") === "1";
   el.frame.checked = load("frame", "0") === "1";
   el.rev.checked = load("rev", "0") === "1";
+  el.margin.value = load("margin", "");
+  el.crop.value = load("crop", "");
+  el.angle.value = load("angle", "90");
+  el.numStart.value = load("numStart", "1");
+  el.pageNum.checked = load("pageNum", "0") === "1";
+  el.gray.checked = load("gray", "0") === "1";
   if (!el.mode.value) el.mode.value = "booklet2";
 
   // ---------- yordamchilar ----------
@@ -173,7 +181,9 @@
     return {
       mode: el.mode.value, n: masterN, range: el.range.value, per: parseInt(el.section.value, 10) || 0,
       rtl: el.rtl.checked, frame: el.frame.checked, rev: el.rev.checked, test: el.test.checked,
-      paper: el.paper.value, scale: el.scale.value
+      paper: el.paper.value, scale: el.scale.value,
+      margin: el.margin.value, crop: el.crop.value, rotate: el.rotate.value, angle: el.angle.value,
+      pageNum: el.pageNum.checked, numStart: el.numStart.value, gray: el.gray.checked
     };
   }
 
@@ -188,7 +198,7 @@
 
     var o = opts();
     plan = KB.planFor(o);
-    el.preview.innerHTML = ""; el.outputs.innerHTML = "";
+    el.preview.innerHTML = ""; el.outputs.innerHTML = ""; el.previewOut.innerHTML = "";
     if (plan.error) {
       el.summary.textContent = ""; msg("err", plan.error); return;
     }
@@ -225,7 +235,7 @@
     Array.prototype.forEach.call(el.outputs.children, function (b) { b.disabled = true; });
     btn.firstChild.textContent = "Tayyorlanmoqda…";
     try {
-      var bytes = await KB.build(masterBytes, o, plan, out.key);
+      var bytes = await KB.make(masterBytes, o, plan, out.key, function (t) { btn.firstChild.textContent = t; });
       saveFile(bytes, baseName() + (o.test ? "_sinov" : "") + out.suffix + ".pdf");
       msg("ok", "Tayyor: fayl yuklab olindi (" + mb(bytes.length) + ").");
     } catch (err) {
@@ -241,8 +251,46 @@
   ["rtl", "frame", "rev"].forEach(function (k) {
     el[k].addEventListener("change", function () { save(k, el[k].checked ? "1" : "0"); });
   });
-  ["mode", "paper", "test", "rtl", "frame", "rev"].forEach(function (k) { el[k].addEventListener("change", refresh); });
-  ["range", "scale", "section"].forEach(function (k) { el[k].addEventListener("input", refresh); });
+  ["margin", "crop", "angle", "numStart"].forEach(function (k) {
+    el[k].addEventListener("change", function () { save(k, el[k].value); });
+  });
+  ["pageNum", "gray"].forEach(function (k) {
+    el[k].addEventListener("change", function () { save(k, el[k].checked ? "1" : "0"); });
+  });
+  ["mode", "paper", "test", "rtl", "frame", "rev", "angle", "pageNum", "gray"].forEach(function (k) { el[k].addEventListener("change", refresh); });
+  ["range", "scale", "section", "margin", "crop", "rotate", "numStart"].forEach(function (k) { el[k].addEventListener("input", refresh); });
+
+  // ---------- oldindan koʻrish ----------
+  if (window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+  el.previewBtn.addEventListener("click", async function () {
+    if (!masterBytes || !plan || plan.error) return;
+    if (!window.pdfjsLib) { msg("err", "Koʻrish kutubxonasi yuklanmadi."); return; }
+    var o = opts(); o.test = true;
+    var p2 = KB.planFor(o);
+    if (p2.error) { msg("err", p2.error); return; }
+    var label = el.previewBtn.firstChild;
+    el.previewBtn.disabled = true; label.textContent = "Tayyorlanmoqda…"; el.previewOut.innerHTML = "";
+    try {
+      for (var q = 0; q < p2.outputs.length; q++) {
+        var out = p2.outputs[q];
+        var bytes = await KB.make(masterBytes, o, p2, out.key, function (t) { label.textContent = t; });
+        var pdf = await window.pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+        var cnt = Math.min(pdf.numPages, o.mode === "bookletDuplex" ? 4 : 2);
+        for (var k = 1; k <= cnt; k++) {
+          var pg = await pdf.getPage(k), vp0 = pg.getViewport({ scale: 1 });
+          var vp = pg.getViewport({ scale: 900 / vp0.width });
+          var cv = document.createElement("canvas"); cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+          await pg.render({ canvasContext: cv.getContext("2d"), viewport: vp }).promise;
+          var fig = document.createElement("figure"), cap = document.createElement("figcaption");
+          cap.textContent = out.label + " · " + k + "-bet";
+          fig.appendChild(cv); fig.appendChild(cap); el.previewOut.appendChild(fig);
+        }
+      }
+    } catch (err) {
+      msg("err", "Koʻrib boʻlmadi: " + ((err && err.message) || err));
+    }
+    label.textContent = "Birinchi varaqlarni koʻrish"; el.previewBtn.disabled = false;
+  });
 
   // ---------- oflayn rejim va oʻrnatish ----------
   var off = $("offline"), inst = $("install"), deferred = null;

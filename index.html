@@ -49,7 +49,7 @@
       <label class="field">
         <span class="lbl">Qaysi betlar chiqarilsin</span>
         <input type="text" id="range" autocomplete="off">
-        <div class="hint">Masalan: <code>1-169</code> yoki <code>1-10, 15-80</code>. Keraksiz betlarni shu yerda chiqarib tashlang.</div>
+        <div class="hint">Masalan: <code>1-169</code> yoki <code>1-10, 15-80</code>. Keraksiz betlarni shu yerda chiqarib tashlang. Tartibini oʻzgartirish: <code>5-8, 1-4</code>, teskari: <code>10-1</code>.</div>
       </label>
 
       <div class="row">
@@ -73,10 +73,51 @@
       <label class="check" data-modes="nup2 nup4"><input type="checkbox" id="frame"><span>Betlar atrofiga ramka chizish</span></label>
       <label class="check" data-modes="booklet2 oddeven"><input type="checkbox" id="rev"><span>Orqa tomon fayli teskari tartibda boʻlsin<br><span class="hint">Faqat sinovda orqa tomon varaqlari teskari chiqsa yoqing.</span></span></label>
       <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
+
+      <details class="more" id="more">
+        <summary>Qoʻshimcha sozlamalar</summary>
+        <div class="row">
+          <label class="field" data-modes="booklet2 bookletDuplex">
+            <span class="lbl">Tikish uchun ichki chet (mm)</span>
+            <input type="number" id="margin" min="0" max="30" step="1" placeholder="0">
+            <div class="hint">Buklanadigan chiziq yonida matn yoʻqolmasligi uchun. Qalin kitobchada 5-10 mm.</div>
+          </label>
+          <label class="field">
+            <span class="lbl">Har tomondan kesish (mm)</span>
+            <input type="number" id="crop" min="0" max="50" step="1" placeholder="0">
+            <div class="hint">Keng oq chetlarni kesib, matnni kattaroq qiladi. Avval “Koʻrish” bilan tekshiring.</div>
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span class="lbl">Qaysi betlarni burish</span>
+            <input type="text" id="rotate" autocomplete="off" placeholder="masalan: 3, 7-9">
+            <div class="hint">Boʻsh qoldirsangiz, hech qaysi bet burilmaydi.</div>
+          </label>
+          <label class="field">
+            <span class="lbl">Burish burchagi</span>
+            <select id="angle"><option value="90">90° oʻngga</option><option value="180">180°</option><option value="270">90° chapga</option></select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="check"><input type="checkbox" id="pageNum"><span>Sahifa raqami qoʻshish (betning pastida)</span></label>
+          <label class="field">
+            <span class="lbl">Boshlangʻich raqam</span>
+            <input type="number" id="numStart" min="0" step="1" placeholder="1">
+          </label>
+        </div>
+        <label class="check"><input type="checkbox" id="gray"><span>Rangsiz (kulrang) chiqarish<br><span class="hint">Siyoh tejaladi. Sahifalar rasmga aylantiriladi, shuning uchun fayl kattaroq va sekinroq tayyorlanadi.</span></span></label>
+      </details>
     </div>
 
     <div class="summary" id="summary"></div>
     <div id="preview"></div>
+
+    <div class="card">
+      <h2>Oldindan koʻrish</h2>
+      <button class="main" id="previewBtn">Birinchi varaqlarni koʻrish<small>Qogʻozga chiqarmay, ekranda tekshirasiz</small></button>
+      <div class="pgrid" id="previewOut"></div>
+    </div>
 
     <div class="card">
       <h2>Tayyor fayllar</h2>
@@ -98,6 +139,7 @@
 <script src="pdf-lib.min.js"></script>
 <script src="mammoth.browser.min.js"></script>
 <script src="html2canvas.min.js"></script>
+<script src="pdf.min.js"></script>
 <script src="core.js"></script>
 <script src="convert.js"></script>
 <script src="app.js"></script>

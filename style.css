@@ -54,3 +54,11 @@ ol { margin:6px 0 0; padding-left:22px; } ol li { margin-bottom:6px; }
 footer { margin-top:24px; font-size:.85rem; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
 button.link { font:inherit; background:none; border:0; color:var(--accent); text-decoration:underline; cursor:pointer; padding:0; }
 .hidden { display:none !important; }
+
+details.more { border-top:1px solid var(--line); padding-top:10px; margin-top:4px; }
+details.more summary { cursor:pointer; font-weight:600; margin-bottom:12px; }
+.pgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:12px; }
+.pgrid figure { margin:0; }
+.pgrid canvas { width:100%; height:auto; border:1px solid var(--line); background:#fff; display:block; }
+.pgrid figcaption { font-size:.82rem; color:var(--muted); margin-top:3px; }
+@media (max-width:520px) { .pgrid { grid-template-columns:1fr; } }
