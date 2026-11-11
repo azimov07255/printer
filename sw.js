@@ -1,10 +1,10 @@
 /* Oflayn ishlash: barcha fayllar birinchi ochilishda keshga olinadi */
-var CACHE = "kitobcha-v1";
+var CACHE = "kitobcha-v2";
 var FILES = [
   "./", "index.html", "style.css", "manifest.webmanifest",
-  "js/core.js", "js/convert.js", "js/app.js",
-  "vendor/pdf-lib.min.js", "vendor/mammoth.browser.min.js", "vendor/html2canvas.min.js",
-  "icons/icon-192.png", "icons/icon-512.png"
+  "core.js", "convert.js", "app.js",
+  "pdf-lib.min.js", "mammoth.browser.min.js", "html2canvas.min.js",
+  "icon-192.png", "icon-512.png"
 ];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
