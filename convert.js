@@ -45,16 +45,15 @@
   }
 
   // ---------- PDF (burilgan betlarni toʻgʻrilab) ----------
-  async function fromPdf(file) {
+  async function fromPdfLib(bytes) {
     var PL = root.PDFLib;
-    var bytes = new Uint8Array(await file.arrayBuffer());
     var src = await PL.PDFDocument.load(bytes, { ignoreEncryption: true });
-    var n = src.getPageCount(), rot = false, i;
-    for (i = 0; i < n; i++) if (src.getPage(i).getRotation().angle % 360 !== 0) rot = true;
-    if (!rot) return { bytes: bytes, pages: n };
+    var n = src.getPageCount(), rot = false, i, idx = [];
+    for (i = 0; i < n; i++) { idx.push(i); if (src.getPage(i).getRotation().angle % 360 !== 0) rot = true; }
+    // keyingi bosqichlarda xato chiqmasligi uchun hamma betni sinab koʻramiz
     var out = await PL.PDFDocument.create();
-    var idx = []; for (i = 0; i < n; i++) idx.push(i);
     var emb = await out.embedPdf(src, idx);
+    if (!rot) return { bytes: bytes, pages: n };
     idx.forEach(function (k) {
       var a = ((src.getPage(k).getRotation().angle % 360) + 360) % 360, e = emb[k], w = e.width, h = e.height;
       var pg = out.addPage(a === 90 || a === 270 ? [h, w] : [w, h]);
@@ -64,6 +63,40 @@
       else pg.drawPage(e, { x: h, y: 0, rotate: PL.degrees(90) });
     });
     return { bytes: await out.save(), pages: n };
+  }
+
+  // Zaxira usul: nostandart PDF ni har betini rasmga aylantirib qayta yigʻish (pdf.js bilan)
+  async function rasterPdf(bytes, onProgress) {
+    var lib = root.pdfjsLib, PL = root.PDFLib;
+    if (!lib) throw new Error("PDF nostandart, uni tiklash kutubxonasi yuklanmadi");
+    var pdf;
+    try { pdf = await lib.getDocument({ data: bytes.slice(), isEvalSupported: false }).promise; }
+    catch (e) {
+      if (e && e.name === "PasswordException") throw new Error("Fayl parol bilan himoyalangan.");
+      throw new Error("PDF faylni oʻqib boʻlmadi (shikastlangan).");
+    }
+    var out = await PL.PDFDocument.create(), sc = 170 / 72;
+    for (var k = 1; k <= pdf.numPages; k++) {
+      if (onProgress) onProgress("Nostandart PDF qayta yigʻilmoqda: " + k + " / " + pdf.numPages);
+      var pg = await pdf.getPage(k), v1 = pg.getViewport({ scale: 1 }), v = pg.getViewport({ scale: sc });
+      var cv = document.createElement("canvas");
+      cv.width = Math.round(v.width); cv.height = Math.round(v.height);
+      var ctx = cv.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+      await pg.render({ canvasContext: ctx, viewport: v }).promise;
+      var jpg = await canvasToJpegBytes(cv, 0.88);
+      var img = await out.embedJpg(jpg);
+      out.addPage([v1.width, v1.height]).drawImage(img, { x: 0, y: 0, width: v1.width, height: v1.height });
+      cv.width = cv.height = 1;
+      await new Promise(function (r) { setTimeout(r, 0); });
+    }
+    return { bytes: await out.save(), pages: pdf.numPages, rebuilt: true };
+  }
+
+  async function fromPdf(file, onProgress) {
+    var bytes = new Uint8Array(await file.arrayBuffer());
+    try { return await fromPdfLib(bytes); }
+    catch (e) { return rasterPdf(bytes, onProgress); }
   }
 
   // ---------- Rasm ----------
@@ -186,7 +219,7 @@
 
   async function toPdf(file, onProgress) {
     var k = kindOf(file);
-    if (k === "pdf") return fromPdf(file);
+    if (k === "pdf") return fromPdf(file, onProgress);
     if (k === "img") return fromImage(file);
     if (k === "docx") return fromDocx(file, onProgress);
     if (k === "txt") return fromText(file, onProgress);
@@ -207,5 +240,5 @@
     return out.save();
   }
 
-  root.KBConvert = { kindOf: kindOf, toPdf: toPdf, merge: merge };
+  root.KBConvert = { kindOf: kindOf, toPdf: toPdf, merge: merge, _raster: rasterPdf };
 })(window);
