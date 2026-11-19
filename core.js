@@ -68,6 +68,7 @@
     nup2: { cols: 2, rows: 1, landscape: true },
     nup4: { cols: 2, rows: 2, landscape: false },
     cards4: { cols: 2, rows: 2, landscape: false },
+    cards8: { cols: 4, rows: 2, landscape: true },
     oddeven: { cols: 1, rows: 1, landscape: false },
     extract: { cols: 1, rows: 1, landscape: false }
   };
@@ -95,37 +96,43 @@
         ? [{ key: "front", label: "1. Old tomon", hint: "Avval shuni chiqaring", suffix: "_kitobcha_1_oldi" },
            { key: "back", label: "2. Orqa tomon", hint: "Varaqlarni aylantirib solib, keyin shuni chiqaring", suffix: "_kitobcha_2_orqa" }]
         : [{ key: "duplex", label: "Kitobcha (bitta fayl)", hint: "Avtomatik ikki tomonlama printer uchun", suffix: "_kitobcha_duplex" }];
-    } else if (mode === "cards4") {
-      // Kartochkalar: varaqda 4 ta (2x2). Har kartochka = 1 yoki 2 bet (old + orqa).
+    } else if (mode === "cards4" || mode === "cards8") {
+      // Kartochkalar: varaqda 4 ta (2x2) yoki 8 ta (4x2). Har kartochka = 1 yoki 2 bet (old + orqa).
+      var cg0 = MODES[mode], per = cg0.cols * cg0.rows;
       var sides = o.sides === 1 || o.sides === "1" ? 1 : 2;
       var cardList = [];
       for (var ci = 0; ci < pages.length; ci += sides) {
         cardList.push({ front: pages[ci], back: sides === 2 && ci + 1 < pages.length ? pages[ci + 1] : null });
       }
       var cs = [], slots = 0;
-      for (var cj = 0; cj < cardList.length; cj += 4) {
-        var grp = cardList.slice(cj, cj + 4);
-        while (grp.length < 4) { grp.push({ front: null, back: null }); slots++; }
-        cs.push({
-          front: grp.map(function (x) { return x.front; }),
-          // orqa tomonda ustunlar oyna kabi almashadi (uzun qirra boʻyicha aylantirish)
-          back: [grp[1].back, grp[0].back, grp[3].back, grp[2].back]
-        });
+      for (var cj = 0; cj < cardList.length; cj += per) {
+        var grp = cardList.slice(cj, cj + per);
+        while (grp.length < per) { grp.push({ front: null, back: null }); slots++; }
+        // orqa tomonda har qatorda ustunlar oyna kabi almashadi (aylantirilganda old tomonning orqasiga tushadi)
+        var bk = [];
+        for (var rr0 = 0; rr0 < cg0.rows; rr0++) {
+          var rowB = grp.slice(rr0 * cg0.cols, (rr0 + 1) * cg0.cols).map(function (x) { return x.back; });
+          bk = bk.concat(rowB.reverse());
+        }
+        cs.push({ front: grp.map(function (x) { return x.front; }), back: bk });
       }
-      plan.sides = sides; plan.cards = cardList.length; plan.emptySlots = slots;
+      plan.sides = sides; plan.cards = cardList.length; plan.emptySlots = slots; plan.perSheet = per;
       plan.totalSheets = cs.length;
       plan.sheets = o.test ? cs.slice(0, 2) : cs;
-      plan.previewCaption = "Varaqdagi kartochkalar (yuqori qator | pastki qator)";
+      plan.previewCaption = "Varaqdagi kartochkalar (qatorma-qator)";
       plan.preview = plan.sheets.slice(0, 3).map(function (s, k) {
-        var f = s.front.map(num), b = s.back.map(num);
-        return { title: (k + 1) + "-varaq", front: f[0] + " | " + f[1] + " // " + f[2] + " | " + f[3],
-                 back: sides === 2 ? b[0] + " | " + b[1] + " // " + b[2] + " | " + b[3] : "—" };
+        function fmt(arr) {
+          var rows = [];
+          for (var q = 0; q < cg0.rows; q++) rows.push(arr.slice(q * cg0.cols, (q + 1) * cg0.cols).map(num).join(" | "));
+          return rows.join(" // ");
+        }
+        return { title: (k + 1) + "-varaq", front: fmt(s.front), back: sides === 2 ? fmt(s.back) : "—" };
       });
       plan.outputs = sides === 2
-        ? [{ key: "duplex", label: "Kartochkalar (bitta fayl)", hint: "Avtomatik ikki tomonlama printer uchun", suffix: "_kartochka_duplex" },
-           { key: "front", label: "1. Old tomon", hint: "Oddiy printer: avval shuni chiqaring", suffix: "_kartochka_1_oldi" },
-           { key: "back", label: "2. Orqa tomon", hint: "Varaqlarni uzun qirra atrofida aylantirib solib, keyin shuni chiqaring", suffix: "_kartochka_2_orqa" }]
-        : [{ key: "front", label: "Kartochkalar (bitta fayl)", hint: "Faqat old tomoni", suffix: "_kartochka" }];
+        ? [{ key: "duplex", label: "Kartochkalar (bitta fayl)", hint: "Avtomatik ikki tomonlama printer uchun", suffix: "_kartochka" + per + "_duplex" },
+           { key: "front", label: "1. Old tomon", hint: "Oddiy printer: avval shuni chiqaring", suffix: "_kartochka" + per + "_1_oldi" },
+           { key: "back", label: "2. Orqa tomon", hint: "Varaqlarni aylantirib solib, keyin shuni chiqaring", suffix: "_kartochka" + per + "_2_orqa" }]
+        : [{ key: "front", label: "Kartochkalar (bitta fayl)", hint: "Faqat old tomoni", suffix: "_kartochka" + per }];
     } else if (mode === "nup2" || mode === "nup4") {
       var size = mode === "nup2" ? 2 : 4, cols = 2;
       var g = gridGroups(pages, size, cols, !!o.rtl);
@@ -235,11 +242,11 @@
         page.drawPage(e, { x: x, y: y, width: w, height: h });
         if (o.frame) page.drawRectangle({ x: x, y: y, width: w, height: h, borderWidth: 0.5, borderColor: PL.rgb(0.55, 0.55, 0.55) });
       });
-      if (o.mode === "cards4") {
+      if (o.mode === "cards4" || o.mode === "cards8") {
         // qirqish uchun punktir chiziqlar (kartochkalar orasida)
-        var gc = PL.rgb(0.6, 0.6, 0.6);
-        page.drawLine({ start: { x: W / 2, y: 0 }, end: { x: W / 2, y: H }, thickness: 0.4, color: gc, dashArray: [3, 3] });
-        page.drawLine({ start: { x: 0, y: H / 2 }, end: { x: W, y: H / 2 }, thickness: 0.4, color: gc, dashArray: [3, 3] });
+        var gc = PL.rgb(0.6, 0.6, 0.6), t;
+        for (t = 1; t < m.cols; t++) page.drawLine({ start: { x: t * sw, y: 0 }, end: { x: t * sw, y: H }, thickness: 0.4, color: gc, dashArray: [3, 3] });
+        for (t = 1; t < m.rows; t++) page.drawLine({ start: { x: 0, y: t * sh }, end: { x: W, y: t * sh }, thickness: 0.4, color: gc, dashArray: [3, 3] });
       }
     });
     return out;
@@ -318,7 +325,7 @@
       plan.sheets.forEach(function (s) { g.push(s.front, s.back); });
       return drawSheets(masterBytes, g, o);
     }
-    if (mode === "cards4") {
+    if (mode === "cards4" || mode === "cards8") {
       var cg = [];
       if (key === "duplex") plan.sheets.forEach(function (s) { cg.push(s.front, s.back); });
       else plan.sheets.forEach(function (s) { cg.push(s[key]); });
