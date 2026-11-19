@@ -216,7 +216,6 @@ front:`
 <h3>Useful Expressions</h3>
 <p><b>Starting:</b> I am writing to... / I would like to... / How are you? / I hope you are doing well.</p>
 <p><b>Giving information:</b> I would like to inform you that... / I am pleased to tell you that... / As you may know...</p>
-<p><b>Ending:</b> I look forward to hearing from you. / Thank you for your time. / I hope to hear from you soon. / Take care.</p>
 <h3>Formal vs Informal</h3>
 <table>
 <tr><th>Formal Letters</th><th>Informal Letters</th></tr>
@@ -248,7 +247,9 @@ back:`
 <li>Short, simple sentences; friendly, personal tone.</li>
 <li>Ending: <i>Best wishes, / Love, / Regards, / Yours,</i></li>
 </ul>
-<p class="ex">Dear Alex,<br>How are you? I hope everything is going well. I wanted to tell you about my new university.<br>Best wishes,<br>Anthony</p>`},
+<p class="ex">Dear Alex,<br>How are you? I hope everything is going well. I wanted to tell you about my new university.<br>Best wishes,<br>Anthony</p>
+<h3>Ending a Letter</h3>
+<p><b>Ending:</b> I look forward to hearing from you. / Thank you for your time. / I hope to hear from you soon. / Take care.</p>`},
 
 { n:8, title:"Quick Summary – All Writing Types",
 front:`
