@@ -11,6 +11,7 @@ PDF, Word (.docx), rasm va matn fayllarini kitobcha va boshqa usullarda chiqaris
 - Kitobcha, avtomatik ikki tomonlama printer uchun: 1 fayl
 - Oddiy hujjatni qoʻlda ikki tomonlama chiqarish: toq va juft betlar
 - Har varaqda 2 yoki 4 bet
+- Kartochkalar: varaqda 4 ta (2×2), qaychi bilan qirqib olish uchun. Hujjatning har 2 beti bitta kartochka (old va orqa), ikki tomonlama chiqarishda orqasi toʻgʻri tushadi, qirqish uchun punktir chiziqlar chiziladi
 - Faqat tanlangan betlarni yangi PDF qilib olish
 
 Qoʻshimcha: A4/A3/Letter, qismlarga boʻlish, sinov rejimi (2 varaq), oʻngdan chapga oʻqiladigan hujjatlar, tikish uchun ichki chet, chetlarni kesish, betlarni burish/oʻchirish/tartibini oʻzgartirish, sahifa raqami, rangsiz (kulrang) chiqarish va chiqarishdan oldin ekranda koʻrish.

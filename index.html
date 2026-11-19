@@ -41,6 +41,7 @@
           <option value="oddeven">Oddiy chiqarish, ikki tomonlama (qoʻlda): toq va juft betlar</option>
           <option value="nup2">Har varaqda 2 bet (qogʻoz tejash)</option>
           <option value="nup4">Har varaqda 4 bet (qogʻoz tejash)</option>
+          <option value="cards4">Kartochkalar: varaqda 4 ta, qirqib olish uchun (old va orqa)</option>
           <option value="extract">Faqat tanlangan betlarni PDF qilib olish</option>
         </select>
         <div class="hint" id="modeHint"></div>
@@ -53,11 +54,11 @@
       </label>
 
       <div class="row">
-        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4">
+        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4 cards4">
           <span class="lbl">Qogʻoz oʻlchami</span>
           <select id="paper"><option>A4</option><option>A3</option><option>Letter</option></select>
         </label>
-        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4">
+        <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4 cards4">
           <span class="lbl">Bet hajmi (%)</span>
           <input type="number" id="scale" min="60" max="100" step="1">
           <div class="hint">95 tavsiya: chetlar kesilmaydi.</div>
@@ -69,10 +70,19 @@
         </label>
       </div>
 
+      <label class="field" data-modes="cards4">
+        <span class="lbl">Kartochka tarkibi</span>
+        <select id="sides">
+          <option value="2">2 bet: 1-bet old tomoni, 2-bet orqa tomoni</option>
+          <option value="1">1 bet: faqat old tomoni</option>
+        </select>
+        <div class="hint">Hujjatning har 2 beti bitta kartochka boʻladi (1-2, 3-4, 5-6…). Bet A4 da yozilgan boʻlsa ham, kartochkaga sigʻadigan qilib kichraytiriladi.</div>
+      </label>
+
       <label class="check" data-modes="booklet2 bookletDuplex nup2 nup4"><input type="checkbox" id="rtl"><span>Oʻngdan chapga oʻqiladigan hujjat</span></label>
-      <label class="check" data-modes="nup2 nup4"><input type="checkbox" id="frame"><span>Betlar atrofiga ramka chizish</span></label>
+      <label class="check" data-modes="nup2 nup4 cards4"><input type="checkbox" id="frame"><span>Betlar atrofiga ramka chizish</span></label>
       <label class="check" data-modes="booklet2 oddeven"><input type="checkbox" id="rev"><span>Orqa tomon fayli teskari tartibda boʻlsin<br><span class="hint">Faqat sinovda orqa tomon varaqlari teskari chiqsa yoqing.</span></span></label>
-      <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
+      <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4 cards4"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
 
       <details class="more" id="more">
         <summary>Qoʻshimcha sozlamalar</summary>

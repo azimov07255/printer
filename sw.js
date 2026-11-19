@@ -1,5 +1,5 @@
 /* Oflayn ishlash: barcha fayllar birinchi ochilishda keshga olinadi */
-var CACHE = "kitobcha-v4";
+var CACHE = "kitobcha-v5";
 var FILES = [
   "./", "index.html", "style.css", "manifest.webmanifest",
   "core.js", "convert.js", "app.js",

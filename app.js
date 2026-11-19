@@ -8,7 +8,7 @@
     listCard: $("listCard"), list: $("fileList"), total: $("total"),
     settings: $("settings"), mode: $("mode"), modeHint: $("modeHint"), range: $("range"),
     paper: $("paper"), scale: $("scale"), section: $("section"),
-    rtl: $("rtl"), frame: $("frame"), rev: $("rev"), test: $("test"),
+    sides: $("sides"), rtl: $("rtl"), frame: $("frame"), rev: $("rev"), test: $("test"),
     margin: $("margin"), crop: $("crop"), rotate: $("rotate"), angle: $("angle"),
     pageNum: $("pageNum"), numStart: $("numStart"), gray: $("gray"), previewBtn: $("previewBtn"), previewOut: $("previewOut"),
     summary: $("summary"), preview: $("preview"), outputs: $("outputs"), steps: $("steps")
@@ -23,6 +23,7 @@
   el.paper.value = load("paper", "A4");
   el.scale.value = load("scale", "95");
   el.section.value = load("section", "0");
+  el.sides.value = load("sides", "2");
   el.rtl.checked = load("rtl", "0") === "1";
   el.frame.checked = load("frame", "0") === "1";
   el.rev.checked = load("rev", "0") === "1";
@@ -149,6 +150,7 @@
     bookletDuplex: "Printeringiz avtomatik ikki tomonlama (duplex) boʻlsa: kitobcha bitta faylda chiqadi.",
     oddeven: "Oddiy hujjatni qogʻozning ikki tomoniga chiqarish: avval toq betlar, keyin juft betlar.",
     nup2: "Har varaqqa 2 ta bet sigʻadi (albom). Qogʻoz 2 marta kam ketadi.",
+    cards4: "Har varaqqa 4 ta kartochka (2×2) chiqadi. Qaychi bilan qirqib olasiz, orqasida davomi boʻladi. Hujjatning har 2 beti = 1 kartochka (old va orqa).",
     nup4: "Har varaqqa 4 ta bet sigʻadi. Qogʻoz 4 marta kam ketadi. Kichik yozuv uchun juda mayda boʻlishi mumkin.",
     extract: "Faqat tanlangan betlar bilan yangi PDF yasaydi."
   };
@@ -172,6 +174,13 @@
       "<b>Juft betlar</b> faylini chiqaring.",
       "Avval <b>sinov</b> (2 varaq) bilan tekshiring. Varaqlar tartibi teskari chiqsa, “orqa tomon teskari tartibda” ni yoqing."
     ],
+    cards4: [
+      "Faylni PDF dasturida oching. Chop etishda masshtab <b>100%</b> (Fit/Shrink emas), yoʻnalish <b>Kitob (Portrait)</b>.",
+      "Avtomatik ikki tomonlama printer: <b>ikki tomonlama</b> chop etishni yoqing va <b>uzun qirra boʻyicha aylantirish (Flip on long edge)</b> ni tanlang. Bitta fayl yetarli.",
+      "Oddiy printer: avval <b>old tomon</b> faylini chiqaring, qogʻozni tartibini buzmasdan <b>uzun qirra atrofida</b> aylantirib solib, <b>orqa tomon</b> faylini chiqaring.",
+      "Avval <b>sinov</b> (2 varaq) bilan tekshiring: old va orqa tomon bir-biriga toʻgʻri tushishi kerak.",
+      "Punktir chiziqlar boʻyicha qaychi bilan 4 ta kartochkaga qirqing."
+    ],
     nup2: ["Faylni oddiy chiqaring: masshtab <b>100%</b>, yoʻnalish <b>Albom (Landscape)</b>.", "Ikki tomonlama kerak boʻlsa, printer sozlamasidan yoqing (qisqa qirra boʻyicha)."],
     nup4: ["Faylni oddiy chiqaring: masshtab <b>100%</b>, yoʻnalish <b>Kitob (Portrait)</b>.", "Ikki tomonlama kerak boʻlsa, printer sozlamasidan yoqing (uzun qirra boʻyicha)."],
     extract: ["Faylni saqlang va istalgan PDF dasturida oching yoki chiqaring."]
@@ -180,7 +189,7 @@
   function opts() {
     return {
       mode: el.mode.value, n: masterN, range: el.range.value, per: parseInt(el.section.value, 10) || 0,
-      rtl: el.rtl.checked, frame: el.frame.checked, rev: el.rev.checked, test: el.test.checked,
+      sides: el.sides.value, rtl: el.rtl.checked, frame: el.frame.checked, rev: el.rev.checked, test: el.test.checked,
       paper: el.paper.value, scale: el.scale.value,
       margin: el.margin.value, crop: el.crop.value, rotate: el.rotate.value, angle: el.angle.value,
       pageNum: el.pageNum.checked, numStart: el.numStart.value, gray: el.gray.checked
@@ -206,7 +215,11 @@
 
     var s = "<b>" + plan.pages.length + " bet</b>";
     if (m === "extract") s += " tanlandi.";
-    else s += " → <b>" + plan.totalSheets + " varaq</b> (" + o.paper + (m === "nup4" ? ", kitob" : m === "oddeven" ? "" : ", albom") + ")";
+    else s += " → <b>" + plan.totalSheets + " varaq</b> (" + o.paper + (m === "nup4" || m === "cards4" ? ", kitob" : m === "oddeven" ? "" : ", albom") + ")";
+    if (m === "cards4") {
+      s = "<b>" + plan.pages.length + " bet</b> → <b>" + plan.cards + " kartochka</b> → <b>" + plan.totalSheets + " varaq</b> (" + o.paper + ", kitob, 2×2)";
+      if (plan.emptySlots) s += ". Oxirgi varaqda " + plan.emptySlots + " ta boʻsh joy qoladi";
+    }
     if (plan.blanks) s += ". Oxirida " + plan.blanks + " ta boʻsh bet qoʻshiladi";
     if (plan.sections > 1) s += ". <b>" + plan.sections + " qism</b>: har qism alohida kitobcha";
     if (o.test) s += "<br>Sinov rejimi: faqat 2 varaq chiqadi.";
@@ -215,7 +228,7 @@
     el.summary.innerHTML = s;
 
     if (plan.preview && plan.preview.length) {
-      var t = '<table class="preview"><caption>Varaqlar tartibi (chap | oʻng)</caption><tr><th></th><th>Old tomon</th><th>Orqa tomon</th></tr>';
+      var t = '<table class="preview"><caption>' + (plan.previewCaption || "Varaqlar tartibi (chap | oʻng)") + '</caption><tr><th></th><th>Old tomon</th><th>Orqa tomon</th></tr>';
       plan.preview.forEach(function (p) { t += "<tr><td>" + p.title + "</td><td>" + p.front + "</td><td>" + p.back + "</td></tr>"; });
       el.preview.innerHTML = t + "</table>";
     }
@@ -245,7 +258,7 @@
     Array.prototype.forEach.call(el.outputs.children, function (b) { b.disabled = false; });
   }
 
-  ["mode", "paper", "scale", "section"].forEach(function (k) {
+  ["mode", "paper", "scale", "section", "sides"].forEach(function (k) {
     el[k].addEventListener("change", function () { save(k, el[k].value); });
   });
   ["rtl", "frame", "rev"].forEach(function (k) {
@@ -257,7 +270,7 @@
   ["pageNum", "gray"].forEach(function (k) {
     el[k].addEventListener("change", function () { save(k, el[k].checked ? "1" : "0"); });
   });
-  ["mode", "paper", "test", "rtl", "frame", "rev", "angle", "pageNum", "gray"].forEach(function (k) { el[k].addEventListener("change", refresh); });
+  ["mode", "paper", "sides", "test", "rtl", "frame", "rev", "angle", "pageNum", "gray"].forEach(function (k) { el[k].addEventListener("change", refresh); });
   ["range", "scale", "section", "margin", "crop", "rotate", "numStart"].forEach(function (k) { el[k].addEventListener("input", refresh); });
 
   // ---------- oldindan koʻrish ----------
@@ -271,11 +284,12 @@
     var label = el.previewBtn.firstChild;
     el.previewBtn.disabled = true; label.textContent = "Tayyorlanmoqda…"; el.previewOut.innerHTML = "";
     try {
-      for (var q = 0; q < p2.outputs.length; q++) {
-        var out = p2.outputs[q];
+      var outsToShow = o.mode === "cards4" ? p2.outputs.slice(0, 1) : p2.outputs;
+      for (var q = 0; q < outsToShow.length; q++) {
+        var out = outsToShow[q];
         var bytes = await KB.make(masterBytes, o, p2, out.key, function (t) { label.textContent = t; });
         var pdf = await window.pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
-        var cnt = Math.min(pdf.numPages, o.mode === "bookletDuplex" ? 4 : 2);
+        var cnt = Math.min(pdf.numPages, o.mode === "bookletDuplex" || o.mode === "cards4" ? 4 : 2);
         for (var k = 1; k <= cnt; k++) {
           var pg = await pdf.getPage(k), vp0 = pg.getViewport({ scale: 1 });
           var vp = pg.getViewport({ scale: 900 / vp0.width });
