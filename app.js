@@ -11,8 +11,11 @@
     sides: $("sides"), rtl: $("rtl"), frame: $("frame"), rev: $("rev"), test: $("test"),
     margin: $("margin"), crop: $("crop"), rotate: $("rotate"), angle: $("angle"),
     pageNum: $("pageNum"), numStart: $("numStart"), gray: $("gray"), previewBtn: $("previewBtn"), previewOut: $("previewOut"),
-    summary: $("summary"), preview: $("preview"), outputs: $("outputs"), steps: $("steps")
+    summary: $("summary"), preview: $("preview"), outputs: $("outputs"), steps: $("steps"),
+    modeGrid: $("modeGrid"), viz: $("viz"), sampleBtn: $("sampleBtn"), previewLbl: $("previewLbl"), update: $("update")
   };
+  var UI = window.KBUI;
+  if (UI) { UI.initTheme(); }
 
   var entries = [], nextId = 1, masterBytes = null, masterN = 0, plan = null, busy = false, lastN = 0;
 
@@ -34,6 +37,38 @@
   el.pageNum.checked = load("pageNum", "0") === "1";
   el.gray.checked = load("gray", "0") === "1";
   if (!el.mode.value) el.mode.value = "booklet2";
+
+  // ---------- rejim kartochkalari ----------
+  var MODE_INFO = [
+    { key: "booklet2", title: "Kitobcha", sub: "oddiy printer · 2 fayl" },
+    { key: "bookletDuplex", title: "Kitobcha", sub: "avto-duplex · 1 fayl" },
+    { key: "oddeven", title: "Ikki tomonlama", sub: "qoʻlda: toq va juft betlar" },
+    { key: "nup2", title: "Varaqda 2 bet", sub: "qogʻoz 2 barobar kam" },
+    { key: "nup4", title: "Varaqda 4 bet", sub: "qogʻoz 4 barobar kam" },
+    { key: "cards4", title: "Kartochka ×4", sub: "qirqib olish, old + orqa", tag: "Yangi" },
+    { key: "cards8", title: "Kartochka ×8", sub: "kichik kartochkalar", tag: "Yangi" },
+    { key: "extract", title: "Kerakli betlar", sub: "yangi PDF qilib olish" }
+  ];
+  function isCards(m) { return m === "cards4" || m === "cards8"; }
+  function buildModes() {
+    el.modeGrid.innerHTML = "";
+    MODE_INFO.forEach(function (mi) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "mode"; b.setAttribute("role", "radio"); b.setAttribute("data-key", mi.key);
+      b.innerHTML = (mi.tag ? '<span class="tag">' + mi.tag + "</span>" : "") + (UI ? UI.icon(mi.key) : "") + "<b>" + mi.title + "</b><small>" + mi.sub + "</small>";
+      b.addEventListener("click", function () {
+        if (el.mode.value === mi.key) return;
+        el.mode.value = mi.key; save("mode", mi.key); refresh();
+      });
+      el.modeGrid.appendChild(b);
+    });
+  }
+  function markModes() {
+    Array.prototype.forEach.call(el.modeGrid.children, function (b) {
+      b.setAttribute("aria-checked", b.getAttribute("data-key") === el.mode.value ? "true" : "false");
+    });
+  }
+  buildModes();
 
   // ---------- yordamchilar ----------
   function msg(kind, text) {
@@ -122,6 +157,8 @@
     var pages = 0;
     entries.forEach(function (e, i) {
       var li = document.createElement("li");
+      var bd = document.createElement("span"); bd.className = "badge";
+      bd.textContent = { pdf: "PDF", docx: "DOCX", olddoc: "DOC", img: "RASM", txt: "TXT" }[e.kind] || "FAYL"; li.appendChild(bd);
       var n = document.createElement("span"); n.className = "name"; n.textContent = e.name; li.appendChild(n);
       var m = document.createElement("span"); m.className = "meta";
       m.textContent = e.state === "busy" ? "oʻqilmoqda…" : e.state === "wait" ? "kutmoqda" : e.state === "err" ? "xato" : e.pages + " bet";
@@ -143,7 +180,7 @@
       }
       el.list.appendChild(li);
     });
-    el.total.textContent = pages ? "· jami " + pages + " bet" : "";
+    el.total.textContent = pages ? "jami " + pages + " bet" : "";
   }
 
   // ---------- rejalash ----------
@@ -153,6 +190,7 @@
     oddeven: "Oddiy hujjatni qogʻozning ikki tomoniga chiqarish: avval toq betlar, keyin juft betlar.",
     nup2: "Har varaqqa 2 ta bet sigʻadi (albom). Qogʻoz 2 marta kam ketadi.",
     cards4: "Har varaqqa 4 ta kartochka (2×2) chiqadi. Qaychi bilan qirqib olasiz, orqasida davomi boʻladi. Hujjatning har 2 beti = 1 kartochka (old va orqa).",
+    cards8: "Har varaqqa 8 ta kichik kartochka (4×2, albom) chiqadi. Qaychi bilan qirqib olasiz, orqasida davomi boʻladi. Hujjatning har 2 beti = 1 kartochka. Yozuv kichik chiqadi, kartochka oʻlchamida (A7) tayyorlangan hujjat eng yaxshi.",
     nup4: "Har varaqqa 4 ta bet sigʻadi. Qogʻoz 4 marta kam ketadi. Kichik yozuv uchun juda mayda boʻlishi mumkin.",
     extract: "Faqat tanlangan betlar bilan yangi PDF yasaydi."
   };
@@ -168,7 +206,7 @@
     bookletDuplex: [
       "Faylni PDF dasturida oching. Chop etishda <b>Масштаб / Scale</b> tanlang (Booklet emas), masshtab <b>100%</b>, yoʻnalish <b>Albom (Landscape)</b>.",
       "Printer sozlamasida <b>ikki tomonlama</b> chop etishni yoqing va <b>qisqa qirra boʻyicha aylantirish (Flip on short edge)</b> ni tanlang.",
-      "Avval <b>sinov</b> (2 varaq) bilan tekshiring, keyin hammasini chiqaring va varaqlarni oʻrtasidan buking."
+      "Avval <b>sinov</b> (2 varaq) bilan tekshiring. Orqa tomon teskari chiqsa, aylantirish sozlamasini boshqasiga (Short edge ↔ Long edge) almashtiring. Keyin hammasini chiqaring va varaqlarni oʻrtasidan buking."
     ],
     oddeven: [
       "Avval <b>toq betlar</b> faylini chiqaring (masshtab 100%).",
@@ -180,8 +218,15 @@
       "Faylni PDF dasturida oching. Chop etishda masshtab <b>100%</b> (Fit/Shrink emas), yoʻnalish <b>Kitob (Portrait)</b>.",
       "Avtomatik ikki tomonlama printer: <b>ikki tomonlama</b> chop etishni yoqing va <b>uzun qirra boʻyicha aylantirish (Flip on long edge)</b> ni tanlang. Bitta fayl yetarli.",
       "Oddiy printer: avval <b>old tomon</b> faylini chiqaring, qogʻozni tartibini buzmasdan <b>uzun qirra atrofida</b> aylantirib solib, <b>orqa tomon</b> faylini chiqaring.",
-      "Avval <b>sinov</b> (2 varaq) bilan tekshiring: old va orqa tomon bir-biriga toʻgʻri tushishi kerak.",
+      "Avval <b>sinov</b> (2 varaq) bilan tekshiring: old va orqa tomon bir-biriga toʻgʻri tushishi kerak. Teskari chiqsa, aylantirish sozlamasini boshqasiga (Short edge ↔ Long edge) almashtiring.",
       "Punktir chiziqlar boʻyicha qaychi bilan 4 ta kartochkaga qirqing."
+    ],
+    cards8: [
+      "Faylni PDF dasturida oching. Chop etishda masshtab <b>100%</b> (Fit/Shrink emas), yoʻnalish <b>Albom (Landscape)</b>.",
+      "Avtomatik ikki tomonlama printer: <b>ikki tomonlama</b> chop etishni yoqing va <b>qisqa qirra boʻyicha aylantirish (Flip on short edge)</b> ni tanlang. Bitta fayl yetarli.",
+      "Oddiy printer: avval <b>old tomon</b> faylini chiqaring, qogʻozni tartibini buzmasdan <b>qisqa qirra atrofida</b> aylantirib solib, <b>orqa tomon</b> faylini chiqaring.",
+      "Avval <b>sinov</b> (2 varaq) bilan tekshiring: old va orqa tomon bir-biriga toʻgʻri tushishi kerak. Teskari chiqsa, aylantirish sozlamasini boshqasiga (Short edge ↔ Long edge) almashtiring.",
+      "Punktir chiziqlar boʻyicha qaychi bilan 8 ta kartochkaga qirqing."
     ],
     nup2: ["Faylni oddiy chiqaring: masshtab <b>100%</b>, yoʻnalish <b>Albom (Landscape)</b>.", "Ikki tomonlama kerak boʻlsa, printer sozlamasidan yoqing (qisqa qirra boʻyicha)."],
     nup4: ["Faylni oddiy chiqaring: masshtab <b>100%</b>, yoʻnalish <b>Kitob (Portrait)</b>.", "Ikki tomonlama kerak boʻlsa, printer sozlamasidan yoqing (uzun qirra boʻyicha)."],
@@ -205,58 +250,86 @@
       n.classList.toggle("hidden", n.getAttribute("data-modes").split(" ").indexOf(m) < 0);
     });
     el.modeHint.textContent = HINTS[m] || "";
+    markModes();
     el.steps.innerHTML = (STEPS[m] || []).map(function (s) { return "<li>" + s + "</li>"; }).join("");
 
     var o = opts();
     plan = KB.planFor(o);
-    el.preview.innerHTML = ""; el.outputs.innerHTML = ""; el.previewOut.innerHTML = "";
+    el.preview.innerHTML = ""; el.outputs.innerHTML = ""; el.previewOut.innerHTML = ""; el.viz.innerHTML = "";
     if (plan.error) {
       el.summary.textContent = ""; msg("err", plan.error); return;
     }
     if (el.msg.textContent && /xato|notoʻgʻri|boʻlishi kerak|tanlanmadi|boshlanish/.test(el.msg.textContent)) msg("", "");
 
-    var s = "<b>" + plan.pages.length + " bet</b>";
-    if (m === "extract") s += " tanlandi.";
-    else s += " → <b>" + plan.totalSheets + " varaq</b> (" + o.paper + (m === "nup4" || m === "cards4" ? ", kitob" : m === "oddeven" ? "" : ", albom") + ")";
-    if (m === "cards4") {
-      s = "<b>" + plan.pages.length + " bet</b> → <b>" + plan.cards + " kartochka</b> → <b>" + plan.totalSheets + " varaq</b> (" + o.paper + ", kitob, 2×2)";
-      if (plan.emptySlots) s += ". Oxirgi varaqda " + plan.emptySlots + " ta boʻsh joy qoladi";
-    }
-    if (plan.blanks) s += ". Oxirida " + plan.blanks + " ta boʻsh bet qoʻshiladi";
-    if (plan.sections > 1) s += ". <b>" + plan.sections + " qism</b>: har qism alohida kitobcha";
-    if (o.test) s += "<br>Sinov rejimi: faqat 2 varaq chiqadi.";
+    function stat(n, label) { return '<div class="stat"><b>' + n + "</b><span>" + label + "</span></div>"; }
+    var arrow = '<div class="stat arrow">→</div>', s = stat(plan.pages.length, m === "extract" ? "bet tanlandi" : "bet");
+    var orient = m === "nup4" || m === "cards4" ? "kitob" : m === "oddeven" ? "" : "albom";
+    if (isCards(m)) s += arrow + stat(plan.cards, "kartochka") + arrow + stat(plan.totalSheets, "varaq · " + o.paper + ", " + orient);
+    else if (m !== "extract") s += arrow + stat(plan.totalSheets, "varaq · " + o.paper + (orient ? ", " + orient : ""));
+    var notes = [];
+    if (isCards(m) && plan.emptySlots) notes.push([false, "Oxirgi varaqda " + plan.emptySlots + " ta boʻsh joy qoladi."]);
+    if (plan.blanks) notes.push([false, "Oxirida " + plan.blanks + " ta boʻsh bet qoʻshiladi."]);
+    if (plan.sections > 1) notes.push([false, plan.sections + " qism: har qism alohida kitobcha."]);
+    if (o.test) notes.push([false, "Sinov rejimi: faqat 2 varaq chiqadi."]);
     if ((m === "booklet2" || m === "bookletDuplex") && plan.sections === 1 && plan.totalSheets > 20 && !o.test)
-      s += "<br>Varaqlar koʻp, kitobcha qalin boʻlib ketadi. “Qismga boʻlish” ga 10 yoki 11 yozishni tavsiya qilamiz.";
+      notes.push([true, "Varaqlar koʻp, kitobcha qalin boʻlib ketadi. “Qismga boʻlish” ga 10 yoki 11 yozishni tavsiya qilamiz."]);
+    notes.forEach(function (n) { s += '<div class="note' + (n[0] ? " warn" : "") + '">' + n[1] + "</div>"; });
     el.summary.innerHTML = s;
+    renderViz(plan, o);
 
     if (plan.preview && plan.preview.length) {
-      var t = '<table class="preview"><caption>' + (plan.previewCaption || "Varaqlar tartibi (chap | oʻng)") + '</caption><tr><th></th><th>Old tomon</th><th>Orqa tomon</th></tr>';
+      var t = '<details class="numlist"><summary>Betlar raqamlari roʻyxati</summary><table class="preview"><caption>' + (plan.previewCaption || "Varaqlar tartibi (chap | oʻng)") + '</caption><tr><th></th><th>Old tomon</th><th>Orqa tomon</th></tr>';
       plan.preview.forEach(function (p) { t += "<tr><td>" + p.title + "</td><td>" + p.front + "</td><td>" + p.back + "</td></tr>"; });
-      el.preview.innerHTML = t + "</table>";
+      el.preview.innerHTML = t + "</table></details>";
     }
 
-    plan.outputs.forEach(function (out) {
-      var b = document.createElement("button"); b.className = "main";
-      b.appendChild(document.createTextNode(out.label));
-      var sm = document.createElement("small"); sm.textContent = out.hint; b.appendChild(sm);
+    var DL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M6.5 10.5 12 16l5.5-5.5M4 19.5h16"/></svg>';
+    plan.outputs.forEach(function (out, idx) {
+      var b = document.createElement("button"); b.className = "main" + (plan.outputs.length > 1 && idx > 0 && /duplex$/.test(plan.outputs[0].key) ? " alt" : "");
+      b.innerHTML = '<span class="dl">' + DL + '</span><span class="t"><b></b><small></small></span>';
+      b.querySelector("b").textContent = out.label; b.querySelector("small").textContent = out.hint;
       b.addEventListener("click", function () { run(out, b); });
       el.outputs.appendChild(b);
     });
   }
 
+  // ---------- varaq ko'rsatkichi ----------
+  function renderViz(p, o) {
+    el.viz.innerHTML = "";
+    if (!UI || !p || p.error) return;
+    var m = o.mode, M = KB.MODES[m], spec = null;
+    if (m === "booklet2" || m === "bookletDuplex") {
+      spec = { landscape: true, cols: 2, rows: 1, fold: true, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: s.front, back: s.back }; }),
+        caption: "Varaqning old tomoni. Oʻrtadagi chiziq boʻylab buklaysiz.",
+        flipHint: "Qogʻozni qisqa qirra atrofida aylantirganda orqa tomon shunday koʻrinadi. Bir xil rangdagi kataklar bir-birining orqasida." };
+    } else if (isCards(m)) {
+      spec = { landscape: M.landscape, cols: M.cols, rows: M.rows, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: s.front, back: p.sides === 2 ? s.back : null }; }),
+        caption: "Har bir rang bitta kartochka. Punktir chiziq boʻylab qirqasiz.",
+        flipHint: "Qogʻozni aylantirganda orqa tomon shunday koʻrinadi: har kartochkaning orqasi aynan oʻz oldining orqasiga tushadi." };
+    } else if (m === "oddeven") {
+      spec = { landscape: false, cols: 1, rows: 1, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: [s.front], back: [s.back] }; }),
+        caption: "Toq bet qogʻozning old tomoniga, juft bet orqasiga chiqadi.", flipHint: "Orqa tomonda juft bet chiqadi." };
+    } else if (m === "nup2" || m === "nup4") {
+      spec = { landscape: M.landscape, cols: M.cols, rows: M.rows, sheets: p.groups.slice(0, 40).map(function (g) { return { front: g, back: null }; }),
+        caption: "Bir varaqqa shuncha bet sigʻadi. Qogʻoz tejaladi." };
+    }
+    if (spec) UI.sheetViewer(el.viz, spec);
+  }
+
   async function run(out, btn) {
     if (!plan || plan.error || !masterBytes) return;
-    var old = btn.firstChild.textContent, o = opts();
+    var tb = btn.querySelector(".t b"), old = tb.textContent, o = opts();
     Array.prototype.forEach.call(el.outputs.children, function (b) { b.disabled = true; });
-    btn.firstChild.textContent = "Tayyorlanmoqda…";
+    tb.textContent = "Tayyorlanmoqda…";
     try {
-      var bytes = await KB.make(masterBytes, o, plan, out.key, function (t) { btn.firstChild.textContent = t; });
+      var bytes = await KB.make(masterBytes, o, plan, out.key, function (t) { tb.textContent = t; });
       saveFile(bytes, baseName() + (o.test ? "_sinov" : "") + out.suffix + ".pdf");
-      msg("ok", "Tayyor: fayl yuklab olindi (" + mb(bytes.length) + ").");
+      msg("ok", "Tayyor! Fayl yuklab olindi (" + mb(bytes.length) + "). Endi printerdan chiqaring.");
+      if (UI) UI.confetti(btn);
     } catch (err) {
       msg("err", "Fayl yasab boʻlmadi: " + ((err && err.message) || err));
     }
-    btn.firstChild.textContent = old;
+    tb.textContent = old;
     Array.prototype.forEach.call(el.outputs.children, function (b) { b.disabled = false; });
   }
 
@@ -275,6 +348,27 @@
   ["mode", "paper", "sides", "test", "rtl", "frame", "rev", "angle", "pageNum", "gray"].forEach(function (k) { el[k].addEventListener("change", refresh); });
   ["range", "scale", "section", "margin", "crop", "rotate", "numStart"].forEach(function (k) { el[k].addEventListener("input", refresh); });
 
+  // ---------- namuna hujjat ----------
+  async function makeSample() {
+    var PL = window.PDFLib, d = await PL.PDFDocument.create();
+    var bold = await d.embedFont(PL.StandardFonts.HelveticaBold), reg = await d.embedFont(PL.StandardFonts.Helvetica);
+    var cols = [[0.06, 0.48, 0.34], [0.12, 0.45, 0.72], [0.85, 0.52, 0.06], [0.55, 0.28, 0.72], [0.8, 0.25, 0.4], [0.35, 0.58, 0.15]];
+    for (var i = 1; i <= 12; i++) {
+      var p = d.addPage([595.28, 841.89]), c = cols[(i - 1) % cols.length], rgb = PL.rgb(c[0], c[1], c[2]);
+      p.drawRectangle({ x: 0, y: 700, width: 595.28, height: 141.89, color: rgb });
+      p.drawText("Namuna hujjat", { x: 48, y: 770, size: 30, font: bold, color: PL.rgb(1, 1, 1) });
+      p.drawText(i + "-bet", { x: 48, y: 733, size: 18, font: reg, color: PL.rgb(1, 1, 1) });
+      p.drawText(String(i), { x: i > 9 ? 150 : 205, y: 360, size: 260, font: bold, color: PL.rgb(c[0] * 0.25 + 0.75, c[1] * 0.25 + 0.75, c[2] * 0.25 + 0.75) });
+      for (var l = 0; l < 7; l++) p.drawRectangle({ x: 48, y: 640 - l * 26, width: l % 3 === 2 ? 330 : 499, height: 9, color: PL.rgb(0.86, 0.89, 0.87), borderWidth: 0 });
+      p.drawText("Kitobcha ilovasining sinov sahifasi", { x: 48, y: 40, size: 11, font: reg, color: PL.rgb(0.4, 0.45, 0.42) });
+    }
+    return new File([await d.save()], "Namuna.pdf", { type: "application/pdf" });
+  }
+  el.sampleBtn.addEventListener("click", async function () {
+    if (busy) return;
+    try { addFiles([await makeSample()]); } catch (err) { msg("err", "Namunani yasab boʻlmadi: " + ((err && err.message) || err)); }
+  });
+
   // ---------- oldindan koʻrish ----------
   if (window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
   el.previewBtn.addEventListener("click", async function () {
@@ -283,15 +377,15 @@
     var o = opts(); o.test = true;
     var p2 = KB.planFor(o);
     if (p2.error) { msg("err", p2.error); return; }
-    var label = el.previewBtn.firstChild;
+    var label = el.previewLbl;
     el.previewBtn.disabled = true; label.textContent = "Tayyorlanmoqda…"; el.previewOut.innerHTML = "";
     try {
-      var outsToShow = o.mode === "cards4" ? p2.outputs.slice(0, 1) : p2.outputs;
+      var outsToShow = isCards(o.mode) ? p2.outputs.slice(0, 1) : p2.outputs;
       for (var q = 0; q < outsToShow.length; q++) {
         var out = outsToShow[q];
         var bytes = await KB.make(masterBytes, o, p2, out.key, function (t) { label.textContent = t; });
         var pdf = await window.pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
-        var cnt = Math.min(pdf.numPages, o.mode === "bookletDuplex" || o.mode === "cards4" ? 4 : 2);
+        var cnt = Math.min(pdf.numPages, o.mode === "bookletDuplex" || isCards(o.mode) ? 4 : 2);
         for (var k = 1; k <= cnt; k++) {
           var pg = await pdf.getPage(k), vp0 = pg.getViewport({ scale: 1 });
           var vp = pg.getViewport({ scale: 900 / vp0.width });
@@ -305,7 +399,7 @@
     } catch (err) {
       msg("err", "Koʻrib boʻlmadi: " + ((err && err.message) || err));
     }
-    label.textContent = "Birinchi varaqlarni koʻrish"; el.previewBtn.disabled = false;
+    label.textContent = "Haqiqiy sahifalarni koʻrish"; el.previewBtn.disabled = false;
   });
 
   // ---------- oflayn rejim va oʻrnatish ----------
@@ -313,7 +407,15 @@
   if (location.protocol === "file:") {
     off.textContent = "Ilova qurilmangizda ishlayapti: internet shart emas ✓";
   } else if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").then(function () { return navigator.serviceWorker.ready; })
+    var hadCtl = !!navigator.serviceWorker.controller, reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (!hadCtl || reloaded) return;
+      if (!entries.length) { reloaded = true; location.reload(); return; }
+      el.update.classList.remove("hidden");
+    });
+    el.update.addEventListener("click", function () { reloaded = true; location.reload(); });
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
+      .then(function (reg) { try { reg.update(); } catch (e) {} return navigator.serviceWorker.ready; })
       .then(function () { off.textContent = "Oflayn ishlashga tayyor ✓ (internet shart emas)"; })
       .catch(function () { off.textContent = "Oflayn rejim yoqilmadi. Faylni yuklab olib, index.html ni oching."; });
   } else {
