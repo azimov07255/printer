@@ -410,8 +410,7 @@
     var hadCtl = !!navigator.serviceWorker.controller, reloaded = false;
     navigator.serviceWorker.addEventListener("controllerchange", function () {
       if (!hadCtl || reloaded) return;
-      if (!entries.length) { reloaded = true; location.reload(); return; }
-      el.update.classList.remove("hidden");
+      $("toast").classList.remove("hidden");      // "Yangi versiya tayyor" xabari
     });
     el.update.addEventListener("click", function () { reloaded = true; location.reload(); });
     navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })

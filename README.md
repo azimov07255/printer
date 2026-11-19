@@ -47,7 +47,7 @@ Kutubxonalar loyiha ichida: pdf-lib 1.17.1 (MIT), mammoth 1.8.0 (BSD-2), html2ca
 
 ## Yangilash
 
-Fayllarni oʻzgartirgach, `sw.js` ichidagi `CACHE = "kitobcha-v7"` raqamini oshiring (masalan, `kitobcha-v8`). Ilova fayllari "avval tarmoq" usulida olinadi, shuning uchun internet bor paytda yangilanish bitta qayta ochishda tushadi. Eski (v4 va undan oldingi) nusxa oʻrnatilgan qurilmalarda yangi versiyaga oʻtish uchun ilovani ikki marta qayta ochish kerak.
+Fayllarni oʻzgartirgach, `sw.js` ichidagi `CACHE = "kitobcha-v8"` raqamini oshiring (masalan, `kitobcha-v9`). Ilova fayllari "avval tarmoq" usulida olinadi, shuning uchun internet bor paytda yangilanish bitta qayta ochishda tushadi va ekranda "Yangi versiya tayyor!" xabari chiqadi. Eski (v4 va undan oldingi) nusxa oʻrnatilgan qurilmalarda yangi versiyaga oʻtish uchun ilovani ikki marta qayta ochish kerak.
 
 Yoʻriqnomadagi skrinshotlarni yangilash: `NODE_PATH=$(npm root -g) node tools/shots.js && python3 tools/to_webp.py`.
 
