@@ -211,10 +211,56 @@
     return htmlToPdf(res.value, false, onProgress);
   }
 
+  // Uzun abzatsni boʻlaklarga boʻlamiz: aks holda betdan uzun abzats kesilib, matn yoʻqoladi.
+  function paraHtml(text) {
+    var pieces = [];
+    text.split("\n").forEach(function (line) {
+      while (line.length > 600) {
+        var cut = line.lastIndexOf(" ", 600);
+        if (cut < 150) cut = 600;
+        pieces.push(line.slice(0, cut));
+        line = line.slice(cut).replace(/^ /, "");
+      }
+      pieces.push(line);
+    });
+    return pieces.map(function (p, i) {
+      return '<div class="kb-txt"' + (i < pieces.length - 1 ? ' style="margin-bottom:0"' : "") + ">" + esc(p) + "</div>";
+    }).join("");
+  }
+
   async function fromText(file, onProgress) {
     var text = (await file.text()).replace(/\r\n?/g, "\n");
-    var paras = text.split(/\n{2,}/).map(function (p) { return '<div class="kb-txt">' + esc(p) + "</div>"; });
+    var paras = text.split(/\n{2,}/).map(paraHtml);
     return htmlToPdf(paras.join(""), true, onProgress);
+  }
+
+  // Eski .doc (Word 97-2003): matn o'qiladi. Ba'zi ".doc" fayllar aslida .docx / RTF / HTML boʻladi.
+  async function fromOldDoc(file, onProgress) {
+    if (!root.KBOldDoc) throw new Error("Eski .doc oʻqish moduli yuklanmadi");
+    if (onProgress) onProgress("Eski .doc fayl oʻqilmoqda…");
+    var buf = await file.arrayBuffer(), r;
+    try { r = root.KBOldDoc.read(new Uint8Array(buf)); }
+    catch (err) { throw new Error((err && err.userMessage) || "Eski .doc faylni oʻqib boʻlmadi. Word da “Saqlash” → .docx yoki PDF qilib saqlang."); }
+    var out;
+    if (r.kind === "docx") {
+      if (!root.mammoth) throw new Error("Word kutubxonasi yuklanmadi");
+      out = await htmlToPdf((await root.mammoth.convertToHtml({ arrayBuffer: buf })).value, false, onProgress);
+      return out;
+    }
+    if (r.kind === "html") {
+      var h = new TextDecoder("utf-8").decode(new Uint8Array(buf)), bm = /<body[^>]*>([\s\S]*)<\/body>/i.exec(h);
+      return htmlToPdf(bm ? bm[1] : h, false, onProgress);
+    }
+    var lines = r.text.replace(/\r\n?/g, "\n").split("\n"), html = [], blank = false;
+    lines.forEach(function (ln) {
+      if (!ln.trim()) { if (!blank) html.push('<div class="kb-txt">&nbsp;</div>'); blank = true; return; }
+      blank = false; html.push(paraHtml(ln));
+    });
+    out = await htmlToPdf(html.join(""), false, onProgress);
+    out.note = r.note === "RTF"
+      ? "RTF fayl: faqat matn olindi (rasm va jadval koʻrinishi saqlanmadi)."
+      : "Eski .doc: faqat matn olindi (jadval koʻrinishi, rasm va shrift saqlanmadi). Aniq koʻrinish kerak boʻlsa, Word da “Saqlash” → PDF qilib tashlang.";
+    return out;
   }
 
   async function toPdf(file, onProgress) {
@@ -223,7 +269,7 @@
     if (k === "img") return fromImage(file);
     if (k === "docx") return fromDocx(file, onProgress);
     if (k === "txt") return fromText(file, onProgress);
-    if (k === "olddoc") throw new Error("Eski .doc formati oʻqilmaydi. Word da “Saqlash” → .docx yoki PDF qilib saqlang.");
+    if (k === "olddoc") return fromOldDoc(file, onProgress);
     throw new Error("Bu format qoʻllab-quvvatlanmaydi (PDF, Word .docx, rasm, .txt mumkin).");
   }
 

@@ -4,18 +4,19 @@ PDF, Word (.docx), rasm va matn fayllarini kitobcha va boshqa usullarda chiqaris
 
 ## Imkoniyatlari
 
-**Qabul qiladigan fayllar:** PDF, Word (.docx), JPG/PNG/WebP, .txt. Bir nechta faylni birlashtirish mumkin.
+**Qabul qiladigan fayllar:** PDF, Word (.docx va eski .doc), JPG/PNG/WebP, .txt. Bir nechta faylni birlashtirish mumkin.
 
 **Chiqarish usullari:**
 - Kitobcha, oddiy (bir tomonlama) printer uchun: 2 fayl (old va orqa tomon)
 - Kitobcha, avtomatik ikki tomonlama printer uchun: 1 fayl
 - Oddiy hujjatni qoʻlda ikki tomonlama chiqarish: toq va juft betlar
 - Har varaqda 2 yoki 4 bet
+- Kartochkalar: varaqda 4 ta (2×2), qaychi bilan qirqib olish uchun. Hujjatning har 2 beti bitta kartochka (old va orqa), ikki tomonlama chiqarishda orqasi toʻgʻri tushadi, qirqish uchun punktir chiziqlar chiziladi
 - Faqat tanlangan betlarni yangi PDF qilib olish
 
 Qoʻshimcha: A4/A3/Letter, qismlarga boʻlish, sinov rejimi (2 varaq), oʻngdan chapga oʻqiladigan hujjatlar, tikish uchun ichki chet, chetlarni kesish, betlarni burish/oʻchirish/tartibini oʻzgartirish, sahifa raqami, rangsiz (kulrang) chiqarish va chiqarishdan oldin ekranda koʻrish.
 
-> Word fayllar brauzerda taxminiy koʻrinishda PDF ga aylantiriladi (shrift, jadval, rasm saqlanadi, murakkab dizayn biroz farq qilishi mumkin). Aniq koʻrinish kerak boʻlsa, Word da “Saqlash → PDF” qilib, PDF ni tashlang. Eski `.doc` formati oʻqilmaydi.
+> Word fayllar brauzerda taxminiy koʻrinishda PDF ga aylantiriladi (shrift, jadval, rasm saqlanadi, murakkab dizayn biroz farq qilishi mumkin). Aniq koʻrinish kerak boʻlsa, Word da “Saqlash → PDF” qilib, PDF ni tashlang. Eski `.doc` (Word 97-2003) dan faqat matn olinadi: jadval koʻrinishi, rasm va shrift saqlanmaydi. Aniq koʻrinish kerak boʻlsa, Word da PDF qilib saqlang. Parol bilan himoyalangan `.doc` oʻqilmaydi.
 
 ## GitHub Pages orqali joylash
 

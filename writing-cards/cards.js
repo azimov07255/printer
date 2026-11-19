@@ -1,0 +1,281 @@
+// Each card: front + back (HTML). 2x2 grid per A4 side, duplex-ready.
+module.exports = [
+{ n:1, title:"Descriptive Composition about a Person",
+front:`
+<h3>Structure</h3>
+<p>A descriptive composition about a person consists of three main parts: an <b>introduction</b>, a <b>main body</b> and a <b>conclusion</b>.</p>
+<h3>1. Introduction</h3>
+<p>We give some basic information about the person. We can mention:</p>
+<ul><li>His or her name.</li><li>When and where we met or saw the person.</li><li>How we know about the person.</li></ul>
+<h3>2. Main Body</h3>
+<p>The main body describes the person in detail. It usually consists of separate paragraphs.</p>
+<p><b>Physical Appearance:</b> We describe the person's height, build, age, face, eyes, hair and clothes. We should start with general details and then mention more specific ones.</p>
+<p><b>Personality and Character:</b> We describe the person's character, behaviour and qualities. We can use examples to support our ideas. If we want to mention negative qualities, we should use polite expressions such as <i>tends to, seems to, is rather</i> or <i>can occasionally be</i>.</p>
+<p><b>Hobbies, Interests and Daily Activities:</b> We write about what the person likes doing in their free time, their hobbies, interests and everyday activities.</p>
+<h3>3. Conclusion</h3>
+<p>We give our personal opinion about the person. We can also express our feelings, explain why we admire them or say why they are important to us.</p>`,
+back:`
+<h3>Points to Remember</h3>
+<ul>
+<li>Each paragraph should begin with a topic sentence.</li>
+<li>Use linking words to connect ideas, such as <i>Moreover, Besides, However, Also, In addition</i> and <i>As a result</i>.</li>
+<li>Use different adjectives to make the description more interesting.</li>
+<li>Use <b>present tenses</b> to describe people who are still part of our lives.</li>
+<li>Use <b>past tenses</b> to describe people from the past or people we will not meet again.</li>
+</ul>
+<h3>Useful Adjectives</h3>
+<p><b>Appearance:</b> tall, short, slim, well-built, gorgeous, handsome, attractive.</p>
+<p><b>Personality:</b> kind-hearted, friendly, sociable, generous, honest, cheerful, patient, hard-working, good-natured.</p>
+<p><b>Negative qualities:</b> rather selfish, a little shy, tends to be impatient, can occasionally be rude.</p>
+<h3>Useful Linking Words</h3>
+<ul class="cols"><li>First of all</li><li>Moreover</li><li>Besides</li><li>In addition</li><li>However</li><li>For example</li><li>As a result</li><li>In conclusion</li><li>In my opinion</li></ul>`},
+
+{ n:2, title:"Descriptive Composition about a Place or Building",
+front:`
+<h3>Structure</h3>
+<p>A descriptive composition about a place or building consists of three main parts: an <b>introduction</b>, a <b>main body</b> and a <b>conclusion</b>.</p>
+<h3>1. Introduction</h3>
+<p>We introduce the place or building. We should mention:</p>
+<ul><li>The name of the place or building.</li><li>Its exact location.</li><li>The reason why we chose to describe it.</li></ul>
+<h3>2. Main Body</h3>
+<p>The main body describes the place or building in detail. We can write about:</p>
+<ul><li>Its size, appearance and surroundings.</li><li>The main features and different parts of the place.</li><li>The atmosphere and what makes it special.</li></ul>
+<p>We should use descriptive adjectives and adverbs to make our writing more interesting.</p>
+<h3>3. Conclusion</h3>
+<p>We express our feelings and final thoughts about the place. We can also give a recommendation and explain why other people should visit it.</p>
+<h3>The Five Senses</h3>
+<ul><li><b>Sight:</b> What can you see?</li><li><b>Hearing:</b> What can you hear?</li><li><b>Smell:</b> What can you smell?</li><li><b>Taste:</b> What can you taste?</li><li><b>Touch:</b> What can you feel?</li></ul>`,
+back:`
+<h3>Points to Remember</h3>
+<ul>
+<li>Use a variety of adjectives, such as <i>enormous, beautiful, delightful, peaceful</i> and <i>attractive</i>.</li>
+<li>Use adverbs, such as <i>beautifully, wonderfully, horribly</i> and <i>carefully</i>.</li>
+<li>Describe the place using the five senses: sight, hearing, smell, taste and touch.</li>
+<li>Use narrative techniques to make the beginning and ending more interesting.</li>
+<li>Use <b>present tenses</b> when describing a place in a tourist brochure.</li>
+<li>Use <b>past tenses</b> when describing a place you visited in the past.</li>
+<li>Use <b>first and second conditionals</b> when describing your ideal house, city or place.</li>
+</ul>
+<h3>Useful Adjectives</h3>
+<p><b>Appearance:</b> enormous, modern, ancient, magnificent, charming, attractive, impressive.</p>
+<p><b>Atmosphere:</b> peaceful, relaxing, lively, crowded, quiet, welcoming.</p>
+<p><b>Feelings:</b> enjoyable, unforgettable, fascinating, wonderful, delightful.</p>
+<h3>Useful Linking Words</h3>
+<ul class="cols"><li>First of all</li><li>Moreover</li><li>Besides</li><li>In addition</li><li>Furthermore</li><li>However</li><li>For example</li><li>Finally</li><li>In conclusion</li></ul>`},
+
+{ n:3, title:"Descriptive Composition about an Object",
+front:`
+<h3>How to Describe an Object</h3>
+<p>We should give clear and accurate information so that the reader can easily imagine it. We should describe:</p>
+<p><b>1. Size and Weight</b> – how big, small, tall, short, heavy or light the object is.</p>
+<p><b>2. Shape</b> – round, oval, rectangular, square, triangular.</p>
+<p><b>3. Pattern and Decoration</b> – striped, floral, plain, patterned, decorated.</p>
+<p><b>4. Colour</b> – blue, red, yellowish, dark green, light pink.</p>
+<p><b>5. Origin</b> – where it comes from or was made: Chinese, Italian, Turkish, Japanese, Uzbek.</p>
+<p><b>6. Material</b> – cotton, wooden, leather, plastic, woollen, polyester, silk.</p>
+<p><b>7. Other Details</b></p>
+<ul><li>Value and price.</li><li>Use and purpose.</li><li>Quality.</li><li>Special characteristics, such as a zip, strap, label, sticker or initials.</li></ul>
+<h3>Points to Remember</h3>
+<ul><li>Give accurate and clear information.</li><li>Use a variety of adjectives.</li><li>Follow the correct order of adjectives.</li><li>Do not use all adjectives in one sentence because it may sound unnatural.</li><li>Write information in different sentences.</li><li>Mention the object's use, quality, value and special features when necessary.</li></ul>`,
+back:`
+<h3>Order of Adjectives</h3>
+<p class="box">Opinion → Size/Weight → Age → Shape → Colour → Pattern → Origin → Material</p>
+<table>
+<tr><th>Order</th><th>Description</th><th>Example</th></tr>
+<tr><td>Opinion</td><td>beautiful, lovely, useful</td><td>Beautiful</td></tr>
+<tr><td>Size/Weight</td><td>small, big, heavy, light</td><td>Small</td></tr>
+<tr><td>Age</td><td>new, old, antique</td><td>Old</td></tr>
+<tr><td>Shape</td><td>round, oval, rectangular</td><td>Round</td></tr>
+<tr><td>Colour</td><td>blue, red, white</td><td>Blue</td></tr>
+<tr><td>Pattern</td><td>striped, floral</td><td>Floral</td></tr>
+<tr><td>Origin</td><td>Chinese, Italian</td><td>Italian</td></tr>
+<tr><td>Material</td><td>wooden, leather, silk</td><td>Wooden</td></tr>
+</table>
+<h3>Example</h3>
+<p class="ex">It is a beautiful small vase. It is quite old and has an oval shape. It is white with a delicate floral pattern. It is made of china and comes from Italy. It is quite valuable and is used for decoration.</p>`},
+
+{ n:4, title:"Descriptive Composition about an Event",
+front:`
+<h3>Structure</h3>
+<p>A descriptive composition about an event consists of three main parts: an <b>introduction</b>, a <b>main body</b> and a <b>conclusion</b>.</p>
+<h3>1. Introduction</h3>
+<p>We introduce the event and set the scene. We should mention:</p>
+<ul><li>The name or type of event.</li><li>The time and place.</li><li>The reason for celebrating or organising the event.</li></ul>
+<h3>2. Main Body</h3>
+<p><b>Preparations:</b> We describe how people prepare for the event, including decorations, food, invitations, clothes and other activities.</p>
+<p><b>The Event:</b> We describe what happened during the event, the activities, people, music, atmosphere and important moments.</p>
+<h3>3. Conclusion</h3>
+<p>We describe people's feelings and opinions about the event. We can mention whether they enjoyed it, what they said and whether it was memorable.</p>
+<h3>Points to Remember</h3>
+<ul>
+<li>Use <b>present tenses</b> for annual events that happen every year.</li>
+<li>Use <b>past tenses</b> for an event you attended in the past.</li>
+<li>Use <b>passive voice</b> to describe preparations and activities.</li>
+<li>Use narrative techniques to make the description more interesting.</li>
+<li>Use a variety of descriptive adjectives to describe the atmosphere.</li>
+<li>Describe people's actions, feelings and reactions.</li>
+</ul>`,
+back:`
+<h3>Passive Voice</h3>
+<p>The passive voice is often used to describe preparations and activities.</p>
+<ul><li>Presents were wrapped in colourful paper.</li><li>The streets were decorated with flowers.</li><li>Delicious food was prepared.</li><li>Invitations were sent to all guests.</li><li>Traditional music was played.</li></ul>
+<h3>Useful Vocabulary</h3>
+<p><b>Preparations:</b> decorate, organise, prepare, invite, arrange, wrap, celebrate.</p>
+<p><b>Atmosphere:</b> crowded, cheerful, exciting, lively, festive, joyful, colourful.</p>
+<p><b>Activities:</b> dance, perform, sing, parade, compete, participate, entertain.</p>
+<p><b>Feelings:</b> excited, delighted, happy, proud, unforgettable, thrilled.</p>
+<h3>Useful Linking Words</h3>
+<ul class="cols"><li>First of all</li><li>Before the event</li><li>During the event</li><li>Meanwhile</li><li>Afterwards</li><li>Later</li><li>Finally</li><li>In conclusion</li></ul>
+<h3>Example of Descriptive Language</h3>
+<p class="ex">During the carnival, onlookers line the crowded streets, clapping and cheering as they watch the brightly coloured floats and exotically dressed dancers go by. The sound of traditional music fills the air, creating a lively and unforgettable atmosphere.</p>`},
+
+{ n:5, title:"Writing Instructions, Describing Processes and Giving Directions",
+front:`
+<h3>How to Write Instructions</h3>
+<p>When writing instructions, describing processes or giving directions, we should give clear and detailed information in <b>chronological order</b> (the order in which things happen). We should use short, simple and clear sentences.</p>
+<p><b>Where can we find them?</b> Manuals, leaflets, cookery books, letters, guides.</p>
+<h3>Points to Remember</h3>
+<ul>
+<li>Give information in the correct order.</li>
+<li>Use short and clear sentences.</li>
+<li>Use the <b>imperative</b> form when giving instructions.</li>
+<li>Write each stage on a new line.</li>
+<li>Number the steps or use subheadings.</li>
+<li>Use sequence words to connect the steps.</li>
+<li>Use expressions such as <i>make sure, remember, wait, be careful</i> and <i>do not</i>.</li>
+<li>Use the <b>passive voice</b> when describing processes.</li>
+</ul>
+<h3>The Imperative</h3>
+<p>Used to give instructions or commands. It usually starts with a verb.</p>
+<ul class="cols"><li>Open the door.</li><li>Add some sugar.</li><li>Mix the ingredients.</li><li>Turn off the machine.</li><li>Do not touch the button.</li><li>Be careful!</li></ul>
+<h3>Sequence Words</h3>
+<p>First · Then · Next · After that · Before · As soon as · Meanwhile · Until · Finally</p>`,
+back:`
+<h3>Useful Expressions</h3>
+<ul class="cols"><li>Make sure...</li><li>Remember to...</li><li>Be careful...</li><li>Do not...</li><li>Wait until...</li><li>Keep doing...</li><li>Add...</li><li>Remove...</li><li>Turn on/off...</li><li>Follow the instructions...</li></ul>
+<h3>Passive Voice in Processes</h3>
+<p>Often used to describe how something is made or how a process happens.</p>
+<ul><li>The peas are picked.</li><li>They are taken to the factory.</li><li>The peas are extracted from the pods.</li><li>The ingredients are mixed together.</li><li>The product is packed and delivered.</li></ul>
+<h3>Example: How to Make Tea</h3>
+<ol>
+<li>First, boil some water.</li>
+<li>Next, put a tea bag into a cup.</li>
+<li>Then, pour the hot water into the cup.</li>
+<li>Wait for a few minutes.</li>
+<li>Add some sugar or milk if you like.</li>
+<li>Finally, remove the tea bag and enjoy your tea.</li>
+</ol>`},
+
+{ n:6, title:"Narrative Composition",
+front:`
+<h3>What is a Narrative?</h3>
+<p>A narrative is a type of writing that tells a story. It can be imaginary or based on real-life experiences. It can be written in <b>first person</b> (I, we, my, our) or <b>third person</b> (he, she, they, his, her).</p>
+<h3>Structure</h3>
+<p><b>1. Introduction</b> – set the scene and introduce the story: the people involved, the time, the place, and an interesting beginning to catch the reader's attention.</p>
+<p><b>2. Main Body</b> – two or more paragraphs. Develop the story: what happened first, what happened next, what problems or situations appeared, how the characters reacted.</p>
+<p><b>3. Conclusion</b> – finish the story: people's feelings and reactions, their comments, the results or consequences, an unexpected or surprising ending.</p>
+<h3>Points to Remember</h3>
+<ul>
+<li>Decide on the plot before you start writing.</li>
+<li>Events must be written in the correct order.</li>
+<li>Use time expressions to connect events.</li>
+<li>Use different adjectives and adverbs.</li>
+<li>Use direct speech to make conversations more realistic.</li>
+<li>Use a variety of verbs to describe actions.</li>
+<li>Add descriptions of people, places and objects when necessary.</li>
+<li>Create an interesting and memorable ending.</li>
+</ul>
+<h3>Sequence Words</h3>
+<p>At first · Before · Until · While · During · Meanwhile · Then · After that · Suddenly · Eventually · Finally</p>`,
+back:`
+<h3>Tenses Used in Narratives</h3>
+<p><b>1. Past Continuous</b> – background or situation at the beginning. <i>It was raining and the wind was blowing.</i></p>
+<p><b>2. Past Simple</b> – the main events. <i>Jonathan opened the door and entered the house.</i></p>
+<p><b>3. Past Perfect</b> – an action before another past action. <i>He had planned the trip for months.</i></p>
+<p><b>4. Participles</b> – make descriptions shorter and more interesting. <i>Startled, he ran towards the door. Smiling happily, she entered the room.</i></p>
+<h3>Useful Vocabulary</h3>
+<p><b>Feelings:</b> excited, frightened, surprised, disappointed, disgusted, delighted, nervous.</p>
+<p><b>Adverbs:</b> fearlessly, surprisingly, suddenly, carefully, quietly, slowly.</p>
+<p><b>Action verbs:</b> shouted, whispered, rushed, grabbed, noticed, discovered, escaped.</p>
+<h3>Direct Speech</h3>
+<p>Shows exactly what a person says.</p>
+<ul><li>"What happened?" she asked.</li><li>"I don't know," he replied.</li><li>"Be careful!" shouted John.</li></ul>
+<h3>Tips for a Good Narrative</h3>
+<ul><li>Start with an interesting sentence.</li><li>Make the story easy to follow.</li><li>Use different sentence structures.</li><li>Describe feelings and actions.</li><li>Use suitable tenses.</li><li>Finish with a memorable ending.</li></ul>`},
+
+{ n:7, title:"Letter Writing",
+front:`
+<h3>Types of Letters</h3>
+<p>Complaint · asking for/giving information · request · asking for/giving advice · invitation · accepting/refusing an invitation · congratulations, thanks, regret or sympathy · giving news · apology · job application · letters to the editor (suggestions or solutions).</p>
+<h3>Structure of a Good Letter</h3>
+<p><b>1. Greeting</b> – <i>Dear Peter, / Dear Mr Ford, / Dear Sir/Madam,</i></p>
+<p><b>2. Introduction</b> – explain why you are writing. <i>I am writing to ask for some information. / I am writing to complain about a product.</i></p>
+<p><b>3. Main Body</b> – explain your ideas in detail, give necessary information, start a new paragraph for each main point.</p>
+<p><b>4. Final Paragraph</b> – summarise or say what you expect. <i>I look forward to your reply. / I hope you will consider my request. / Thank you for your help.</i></p>
+<p><b>5. Ending</b> – closing phrase and your name. <i>Yours sincerely, / Yours faithfully, / Best wishes, / Love,</i></p>
+<h3>Useful Expressions</h3>
+<p><b>Starting:</b> I am writing to... / I would like to... / How are you? / I hope you are doing well.</p>
+<p><b>Giving information:</b> I would like to inform you that... / I am pleased to tell you that... / As you may know...</p>
+<h3>Formal vs Informal</h3>
+<table>
+<tr><th>Formal Letters</th><th>Informal Letters</th></tr>
+<tr><td>Official purpose</td><td>Personal purpose</td></tr>
+<tr><td>Polite language</td><td>Friendly language</td></tr>
+<tr><td>No contractions</td><td>Contractions allowed</td></tr>
+<tr><td>Complex sentences</td><td>Simple sentences</td></tr>
+<tr><td>Dear Sir/Madam</td><td>Dear Alex</td></tr>
+<tr><td>Yours faithfully</td><td>Best wishes / Love</td></tr>
+</table>`,
+back:`
+<h3>1. Formal Letters</h3>
+<p>Written to people we do not know personally, or to organisations, companies and official institutions.</p>
+<ul>
+<li>Formal greeting: <i>Dear Mr Smith, Dear Sir/Madam.</i></li>
+<li>Formal language and polite expressions.</li>
+<li>Frequent use of passive voice; complex sentences.</li>
+<li>No contractions (do not use <i>don't, can't, I'm</i>).</li>
+<li>Avoid slang and informal expressions.</li>
+<li>Ending: <i>Yours sincerely, / Yours faithfully,</i></li>
+</ul>
+<p class="ex">Dear Sir/Madam,<br>I am writing to request some information about your courses.<br>Yours faithfully,<br>John Smith</p>
+<h3>2. Informal Letters</h3>
+<p>Written to friends, family members and people we know well.</p>
+<ul>
+<li>Friendly greeting: <i>Dear Alex, Dear Mum.</i></li>
+<li>Informal, natural language; idioms and everyday expressions.</li>
+<li>Contractions are allowed (<i>I'm, don't, can't</i>).</li>
+<li>Short, simple sentences; friendly, personal tone.</li>
+<li>Ending: <i>Best wishes, / Love, / Regards, / Yours,</i></li>
+</ul>
+<p class="ex">Dear Alex,<br>How are you? I hope everything is going well. I wanted to tell you about my new university.<br>Best wishes,<br>Anthony</p>
+<h3>Ending a Letter</h3>
+<p><b>Ending:</b> I look forward to hearing from you. / Thank you for your time. / I hope to hear from you soon. / Take care.</p>`},
+
+{ n:8, title:"Quick Summary – All Writing Types",
+front:`
+<p><b>1. PERSON</b> – Introduction (name, when/where met, how you know them) + Main Body (appearance, personality, hobbies) + Conclusion (opinion, feelings). <i>Present</i> tenses (living person), <i>Past</i> tenses (person from the past).</p>
+<p><b>2. PLACE / BUILDING</b> – Introduction (name, location, reason) + Main Body (appearance, size, surroundings, features, atmosphere) + Conclusion (feelings, recommendation). Adjectives, adverbs, five senses. <i>Present</i> (brochure), <i>Past</i> (past visit), <i>Conditionals</i> (ideal place).</p>
+<p><b>3. OBJECT</b> – size/weight, shape, pattern, colour, origin, material, value, use, quality, special features.<br>Opinion → Size/Weight → Age → Shape → Colour → Pattern → Origin → Material.<br><i>A beautiful small old round blue vase.</i></p>
+<p><b>4. EVENT</b> – Introduction (name/type, time, place, reason) + Main Body (preparations and the actual event) + Conclusion (feelings, comments, reactions). Annual events – <i>Present</i>; past events – <i>Past</i>. Passive voice, descriptive adjectives.</p>
+<p><b>5. INSTRUCTIONS / PROCESSES / DIRECTIONS</b> – clear information in chronological order. Short, clear sentences; imperative for instructions; number each step; passive voice for processes. First, then, next, after that, as soon as, until, finally. Make sure, remember, wait, be careful, do not.</p>`,
+back:`
+<p><b>6. NARRATIVE</b> – imaginary or real story; 1st person (I/we) or 3rd person (he/she/they). Introduction (people, time, place) + Main Body (events, actions, problems; 2+ paragraphs) + Conclusion (feelings, reactions, consequences or surprising ending). Plan the plot, chronological order, direct speech. <i>Past Continuous</i> – background; <i>Past Simple</i> – main events; <i>Past Perfect</i> – earlier past events; <i>Participles</i> – shorter descriptions.</p>
+<p><b>7. LETTER</b> – Greeting + Introduction (reason) + Main Body (details) + Final Paragraph (summary/wish) + Ending + Name.<br><b>Formal:</b> Dear Sir/Madam, Dear Mr Smith; polite, official language; passive, complex sentences; no contractions; <i>Yours faithfully / Yours sincerely.</i><br><b>Informal:</b> Dear Alex, Dear Mum; friendly language; idioms; contractions allowed; <i>Best wishes, Love, Regards.</i></p>
+<h3>Important Grammar Summary</h3>
+<ul>
+<li>Person – Present / Past.</li>
+<li>Place – Present / Past / Conditionals.</li>
+<li>Object – Adjective order.</li>
+<li>Event – Present / Past / Passive.</li>
+<li>Instructions – Imperative / Passive.</li>
+<li>Narrative – Past Continuous / Past Simple / Past Perfect.</li>
+<li>Letters – Formal / Informal style.</li>
+</ul>
+<h3>Main Structures</h3>
+<ul>
+<li>Descriptive writing → Introduction + Main Body + Conclusion.</li>
+<li>Narrative → Setting + Events + Ending.</li>
+<li>Instructions → Steps in chronological order.</li>
+<li>Letter → Greeting + Body + Ending.</li>
+</ul>`}
+];
