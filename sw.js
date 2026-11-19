@@ -1,8 +1,8 @@
 /* Oflayn ishlash: barcha fayllar birinchi ochilishda keshga olinadi */
-var CACHE = "kitobcha-v5";
+var CACHE = "kitobcha-v6";
 var FILES = [
   "./", "index.html", "style.css", "manifest.webmanifest",
-  "core.js", "convert.js", "app.js",
+  "core.js", "olddoc.js", "convert.js", "app.js",
   "pdf-lib.min.js", "pdf.min.js", "pdf.worker.min.js", "mammoth.browser.min.js", "html2canvas.min.js",
   "icon-192.png", "icon-512.png"
 ];

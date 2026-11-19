@@ -81,7 +81,7 @@
       try {
         status(e.name + " oʻqilmoqda…");
         var r = await CV.toPdf(e.file, function (t) { status(e.name + ": " + t); });
-        e.bytes = r.bytes; e.pages = r.pages; e.state = "ok";
+        e.bytes = r.bytes; e.pages = r.pages; e.note = r.note || ""; e.state = "ok";
       } catch (err) {
         e.state = "err"; e.error = (err && err.message) || "Oʻqib boʻlmadi";
       }
@@ -89,7 +89,9 @@
     }
     status("");
     var bad = fresh.filter(function (e) { return e.state === "err"; });
+    var notes = fresh.filter(function (e) { return e.state === "ok" && e.note; });
     if (bad.length) msg("err", bad.map(function (e) { return e.name + ": " + e.error; }).join("\n"));
+    else if (notes.length) msg("warn", notes.map(function (e) { return e.name + ": " + e.note; }).join("\n"));
     entries = entries.filter(function (e) { return e.state === "ok"; });
     busy = false;
     await rebuildMaster();
