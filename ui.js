@@ -82,6 +82,14 @@
       case "cards8":
         s += grid(6, 8, 60, 40, 4, 2, ["1", "2", "3", "4", "5", "6", "7", "8"], { colors: true, cut: true });
         break;
+      case "labels":
+        s += grid(16, 2, 40, 52, 2, 2, null, { cut: true });
+        [[18, 4], [38, 4], [18, 30], [38, 30]].forEach(function (p) {
+          s += '<rect class="i-cell i-lab" x="' + p[0] + '" y="' + p[1] + '" width="16" height="22" rx="1.6"/>';
+          s += '<circle class="i-face" cx="' + (p[0] + 8) + '" cy="' + (p[1] + 9) + '" r="3.6"/>';
+          s += '<path class="i-face" d="M' + (p[0] + 3) + ' ' + (p[1] + 19) + ' q5 -8 10 0z"/>';
+        });
+        break;
       case "extract":
         s += '<rect class="i-sheet i-ghost" x="30" y="4" width="30" height="42" rx="3"/>';
         s += '<rect class="i-sheet i-ghost" x="22" y="8" width="30" height="42" rx="3"/>';

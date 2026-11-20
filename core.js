@@ -69,6 +69,7 @@
     nup4: { cols: 2, rows: 2, landscape: false },
     cards4: { cols: 2, rows: 2, landscape: false },
     cards8: { cols: 4, rows: 2, landscape: true },
+    labels: { cols: 1, rows: 1, landscape: false },
     oddeven: { cols: 1, rows: 1, landscape: false },
     extract: { cols: 1, rows: 1, landscape: false }
   };
@@ -133,6 +134,29 @@
            { key: "front", label: "1. Old tomon", hint: "Oddiy printer: avval shuni chiqaring", suffix: "_kartochka" + per + "_1_oldi" },
            { key: "back", label: "2. Orqa tomon", hint: "Varaqlarni aylantirib solib, keyin shuni chiqaring", suffix: "_kartochka" + per + "_2_orqa" }]
         : [{ key: "front", label: "Kartochkalar (bitta fayl)", hint: "Faqat old tomoni", suffix: "_kartochka" + per }];
+    } else if (mode === "labels") {
+      // Stiker / qoplama: har bir rasm qutining oʻlchamida, varaqqa imkon qadar koʻp sigʻdiriladi
+      var LB = o.lab || {};
+      if (!(LB.w > 0 && LB.h > 0 && LB.w <= 2000 && LB.h <= 2000)) return { error: "Stiker oʻlchamini (eni va boʻyi, mm) kiriting." };
+      var lay = labelLayout(LB, o.paper);
+      if (!lay) return { error: "Bu oʻlcham varaqqa sigʻmaydi. Kattaroq qogʻoz (A3) tanlang yoki chetlarni (mm) kamaytiring." };
+      var copies = Math.max(1, Math.min(500, parseInt(LB.copies, 10) || 1)), items = [];
+      pages.forEach(function (pi) { for (var q = 0; q < copies; q++) items.push(pi); });
+      var all = [];
+      for (var li = 0; li < items.length; li += lay.per) {
+        var slot = items.slice(li, li + lay.per);
+        while (slot.length < lay.per) slot.push(null);
+        all.push({ front: slot });
+      }
+      plan.label = lay; plan.items = items.length; plan.emptySlots = all.length * lay.per - items.length;
+      plan.totalSheets = all.length;
+      plan.sheets = o.test ? all.slice(0, 2) : all;
+      var uq = {}; plan.sheets.forEach(function (s) { s.front.forEach(function (x) { if (x !== null) uq[x] = true; }); });
+      plan.usedPages = Object.keys(uq).map(Number);
+      plan.outputs = [
+        { key: "labels", label: "Stikerlar (PDF)", hint: "Varaqlarni 100% masshtabda chiqaring", suffix: "_stiker" },
+        { key: "outline", label: "Sinov: faqat kontur", hint: "Oddiy qogʻozga chiqarib, qutiga qoʻyib oʻlchamni tekshiring", suffix: "_kontur" }
+      ];
     } else if (mode === "nup2" || mode === "nup4") {
       var size = mode === "nup2" ? 2 : 4, cols = 2;
       var g = gridGroups(pages, size, cols, !!o.rtl);
@@ -166,6 +190,7 @@
     if (plan.sheets) plan.sheets.forEach(function (sh) { [].concat(sh.front, sh.back).forEach(add); });
     if (plan.groups) plan.groups.forEach(function (g) { g.forEach(add); });
     if (plan.mode === "extract") plan.pages.forEach(add);
+    if (plan.usedPages) plan.usedPages.forEach(add);
     return u;
   }
 
@@ -313,6 +338,108 @@
     return out.save();
   }
 
+  // ---------- Stiker / qoplama ----------
+  // lab: {w, h (mm), gap, margin (mm), rot: "auto" | "no"}
+  function labelLayout(lab, paper) {
+    var w = lab.w, h = lab.h, gap = Math.max(0, parseFloat(lab.gap) || 0), m = Math.max(0, parseFloat(lab.margin) || 0);
+    var p = PAPER[paper] || PAPER.A4, best = null, gp = gap * MM;
+    [[Math.min(p[0], p[1]), Math.max(p[0], p[1])], [Math.max(p[0], p[1]), Math.min(p[0], p[1])]].forEach(function (sz) {
+      [false, true].forEach(function (rot) {
+        if (rot && lab.rot === "no") return;
+        var iw = (rot ? h : w) * MM, ih = (rot ? w : h) * MM;
+        var uw = sz[0] - 2 * m * MM, uh = sz[1] - 2 * m * MM;
+        var cols = Math.floor((uw + gp) / (iw + gp)), rows = Math.floor((uh + gp) / (ih + gp));
+        if (cols < 1 || rows < 1) return;
+        if (!best || cols * rows > best.per) best = { W: sz[0], H: sz[1], cols: cols, rows: rows, per: cols * rows, rot: rot, iw: iw, ih: ih, gp: gp, landscape: sz[0] > sz[1] };
+      });
+    });
+    if (!best) return null;
+    best.x0 = (best.W - (best.cols * best.iw + (best.cols - 1) * gp)) / 2;
+    best.yTop = (best.H - (best.rows * best.ih + (best.rows - 1) * gp)) / 2;
+    return best;
+  }
+
+  // Kadr: crop = {x, y, w} (asos quti ichida, 0..1; y yuqoridan). Standart: markazlangan, toʻliq qoplaydigan.
+  function labelFrame(B, crop, aspect) {
+    var maxW = Math.min(1, aspect * B.h / B.w), cw = crop && crop.w > 0 ? Math.min(crop.w, maxW) : maxW;
+    var fw = cw * B.w, fh = fw / aspect;
+    var cx = crop && isFinite(crop.x) ? crop.x : (1 - cw) / 2, cy = crop && isFinite(crop.y) ? crop.y : (1 - fh / B.h) / 2;
+    cx = Math.max(0, Math.min(1 - cw, cx)); cy = Math.max(0, Math.min(1 - fh / B.h, cy));
+    return { left: B.x + cx * B.w, bottom: B.y + B.h - cy * B.h - fh, w: fw, h: fh };
+  }
+
+  function dashRect(page, x, y, w, h, color, th, dash) {
+    var PL = root.PDFLib;
+    page.drawRectangle({ x: x, y: y, width: w, height: h, borderColor: color, borderWidth: th, borderDashArray: dash });
+  }
+
+  async function drawLabels(masterBytes, o, plan, outline) {
+    var PL = root.PDFLib, lab = o.lab, lay = plan.label, aspect = lab.w / lab.h;
+    var out = await PL.PDFDocument.create();
+    var font = await out.embedFont(PL.StandardFonts.Helvetica), bold = await out.embedFont(PL.StandardFonts.HelveticaBold);
+    var gray = PL.rgb(0.45, 0.45, 0.45), dark = PL.rgb(0.1, 0.1, 0.1);
+    var bleed = Math.max(0, Math.min(parseFloat(lab.bleed) || 0, (lay.gp / MM) / 2)), gapMm = lay.gp / MM;
+    var map = {}, geo = {};
+    if (!outline) {
+      var src = await PL.PDFDocument.load(masterBytes, { ignoreEncryption: true });
+      var idxs = plan.usedPages.slice(), pgs = [], boxes = [];
+      idxs.forEach(function (idx) {
+        var pg = src.getPage(idx), z = pg.getSize();
+        var bx = lab.boxes && lab.boxes[idx];
+        var B = bx ? { x: bx.x, y: bx.y, w: bx.w, h: bx.h } : { x: 0, y: 0, w: z.width, h: z.height };
+        var fr = labelFrame(B, lab.crops && lab.crops[idx], aspect);
+        var ex = bleed * (fr.w / lab.w);
+        var L = Math.max(B.x, fr.left - ex), R = Math.min(B.x + B.w, fr.left + fr.w + ex);
+        var Bt = Math.max(B.y, fr.bottom - ex), T = Math.min(B.y + B.h, fr.bottom + fr.h + ex);
+        geo[idx] = { fr: fr, L: L, R: R, B: Bt, T: T };
+        pgs.push(pg); boxes.push({ left: L, bottom: Bt, right: R, top: T });
+      });
+      var emb = await out.embedPages(pgs, boxes);
+      idxs.forEach(function (idx, j) { map[idx] = emb[j]; });
+    }
+    var tick = Math.min(3, gapMm - 1.2), t0 = 0.6;
+    (outline ? [plan.sheets[0]] : plan.sheets).forEach(function (sh, si) {
+      var page = out.addPage([lay.W, lay.H]);
+      var slots = outline ? new Array(lay.per).fill(0) : sh.front;
+      slots.forEach(function (it, k) {
+        if (it === null) return;
+        var r = Math.floor(k / lay.cols), c = k % lay.cols;
+        var X = lay.x0 + c * (lay.iw + lay.gp), Y = lay.H - lay.yTop - (r + 1) * lay.ih - r * lay.gp;
+        if (!outline) {
+          var g = geo[it], e = map[it], s = (lab.w * MM) / g.fr.w;
+          var rw = (g.R - g.L) * s, rh = (g.T - g.B) * s, dx = (g.L - g.fr.left) * s, dy = (g.B - g.fr.bottom) * s;
+          if (!lay.rot) page.drawPage(e, { x: X + dx, y: Y + dy, width: rw, height: rh });
+          else page.drawPage(e, { x: X + lab.h * MM - dy, y: Y + dx, width: rw, height: rh, rotate: PL.degrees(90) });
+        }
+        if (outline) {
+          page.drawRectangle({ x: X, y: Y, width: lay.iw, height: lay.ih, borderColor: dark, borderWidth: 0.9 });
+          var cx = X + lay.iw / 2, cy = Y + lay.ih / 2;
+          page.drawLine({ start: { x: cx - 8, y: cy }, end: { x: cx + 8, y: cy }, thickness: 0.4, color: gray });
+          page.drawLine({ start: { x: cx, y: cy - 8 }, end: { x: cx, y: cy + 8 }, thickness: 0.4, color: gray });
+          var tx = lab.w + " x " + lab.h + " mm", tw = bold.widthOfTextAtSize(tx, 10);
+          page.drawText(tx, { x: cx - tw / 2, y: cy + 14, size: 10, font: bold, color: dark });
+        } else if (lab.marks === "dash") {
+          dashRect(page, X, Y, lay.iw, lay.ih, gray, 0.4, [3, 2]);
+        } else if (lab.marks !== "none" && tick > 0.8) {
+          var o1 = t0 * MM, o2 = (t0 + tick) * MM, th = 0.35, xs = [X, X + lay.iw], ys = [Y, Y + lay.ih];
+          xs.forEach(function (px, ix) {
+            ys.forEach(function (py, iy) {
+              var sx = ix === 0 ? -1 : 1, sy = iy === 0 ? -1 : 1;
+              page.drawLine({ start: { x: px + sx * o1, y: py }, end: { x: px + sx * o2, y: py }, thickness: th, color: dark });
+              page.drawLine({ start: { x: px, y: py + sy * o1 }, end: { x: px, y: py + sy * o2 }, thickness: th, color: dark });
+            });
+          });
+        }
+      });
+      if ((parseFloat(lab.margin) || 0) >= 6) {
+        var ft = (outline ? "SINOV: faqat kontur · " : "") + lab.w + " x " + lab.h + " mm · masshtab 100% · varaq " + (si + 1) + "/" + plan.sheets.length;
+        var fw = font.widthOfTextAtSize(ft, 6.5);
+        page.drawText(ft, { x: (lay.W - fw) / 2, y: 7, size: 6.5, font: font, color: gray });
+      }
+    });
+    return out;
+  }
+
   async function buildDoc(masterBytes, o, plan, key) {
     var mode = plan.mode;
     if (mode === "booklet2") {
@@ -325,6 +452,7 @@
       plan.sheets.forEach(function (s) { g.push(s.front, s.back); });
       return drawSheets(masterBytes, g, o);
     }
+    if (mode === "labels") return drawLabels(masterBytes, o, plan, key === "outline");
     if (mode === "cards4" || mode === "cards8") {
       var cg = [];
       if (key === "duplex") plan.sheets.forEach(function (s) { cg.push(s.front, s.back); });
@@ -347,5 +475,5 @@
     return o.gray ? grayRaster(bytes, onProgress) : bytes;
   }
 
-  root.KB = { PAPER: PAPER, MODES: MODES, parseRange: parseRange, planFor: planFor, make: make };
+  root.KB = { PAPER: PAPER, MODES: MODES, parseRange: parseRange, planFor: planFor, make: make, labelLayout: labelLayout, labelFrame: labelFrame };
 })(typeof window !== "undefined" ? window : globalThis);
