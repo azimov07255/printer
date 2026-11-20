@@ -139,6 +139,8 @@ main { padding:0 0 56px; margin-top:-8px; position:relative; z-index:3; }
 .ico .i-num { font:800 8.5px ui-sans-serif,system-ui,sans-serif; fill:var(--brand-ink); }
 .ico .i-fold { stroke:var(--brand); stroke-width:.9; stroke-dasharray:2 2; }
 .ico .i-cut { stroke:var(--amber); stroke-width:.9; stroke-dasharray:2.2 1.8; }
+.ico .i-lab { fill:#fff1d6; stroke:var(--amber); }
+.ico .i-face { fill:var(--amber); stroke:none; }
 .ico .i-badge { fill:var(--brand); } .ico .i-badge-t { font:800 9px ui-sans-serif,sans-serif; fill:var(--on-brand); }
 .ico .i-arrow { fill:none; stroke:var(--brand); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 .ico .i-check { fill:none; stroke:var(--brand); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
@@ -240,6 +242,19 @@ ol.steps li::before { content:counter(s); position:absolute; left:14px; top:13px
 
 footer { text-align:center; color:var(--muted); font-size:.85rem; padding:8px 0 40px; display:grid; gap:8px; justify-items:center; }
 button.link { font:inherit; background:none; border:0; color:var(--brand); text-decoration:underline; cursor:pointer; padding:0; }
+
+/* stiker muharriri */
+.labbox { display:grid; gap:14px; }
+.labed { border:1.5px solid var(--line); border-radius:16px; padding:14px; background:var(--surface-2); }
+.labed-stage { position:relative; width:100%; max-width:460px; margin:0 auto; background:repeating-conic-gradient(#d9e2dd 0 25%,#f2f6f3 0 50%) 0 0/16px 16px; border-radius:10px; overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none; box-shadow:var(--shadow); }
+.labed-stage canvas { display:block; width:100%; height:100%; }
+.labframe { position:absolute; border:2px solid #fff; outline:2px dashed var(--brand); box-shadow:0 0 0 9999px rgba(8,20,16,.55); cursor:move; touch-action:none; }
+.labframe .labtxt { position:absolute; left:6px; top:6px; background:var(--brand); color:var(--on-brand); font-size:.7rem; font-weight:800; padding:2px 8px; border-radius:999px; pointer-events:none; white-space:nowrap; }
+.labframe .grip { position:absolute; right:6px; bottom:6px; width:30px; height:30px; border-radius:50%; background:var(--brand); border:3px solid #fff; cursor:nwse-resize; box-shadow:0 4px 10px rgba(0,0,0,.4); touch-action:none; }
+.labed-ctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+.labed-ctl input[type=range] { flex:1 1 150px; min-width:120px; accent-color:var(--brand); }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+.row2 label { display:block; }
 
 /* yangi versiya xabari */
 .toast { position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:100; display:flex; align-items:center; gap:12px; width:min(94vw,440px); padding:12px 12px 12px 16px; border-radius:18px; color:#fff; background:linear-gradient(135deg,#0a5a41,#12936b); box-shadow:0 18px 40px -12px rgba(0,0,0,.5); animation:toast-in .5s cubic-bezier(.2,.9,.3,1.2); }

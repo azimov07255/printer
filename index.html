@@ -113,6 +113,7 @@
           <option value="nup4">Har varaqda 4 bet</option>
           <option value="cards4">Kartochkalar: varaqda 4 ta</option>
           <option value="cards8">Kartochkalar: varaqda 8 ta</option>
+          <option value="labels">Qutiga stiker: rasm qutining oʻlchamida</option>
           <option value="extract">Faqat tanlangan betlar</option>
         </select></label></div>
 
@@ -124,7 +125,7 @@
         </label>
 
         <div class="row">
-          <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4 cards4 cards8">
+          <label class="field" data-modes="booklet2 bookletDuplex nup2 nup4 cards4 cards8 labels">
             <span class="lbl">Qogʻoz oʻlchami</span>
             <select id="paper"><option>A4</option><option>A3</option><option>Letter</option></select>
           </label>
@@ -149,11 +150,57 @@
           <div class="hint">Hujjatning har 2 beti bitta kartochka boʻladi (1-2, 3-4, 5-6…). Bet kartochkaga sigʻadigan qilib kichraytiriladi: A4 betdan 4 talikda taxminan ikki barobar, 8 talikda uch barobar kichik chiqadi.</div>
         </label>
 
+        <div class="labbox" data-modes="labels">
+          <div class="labed">
+            <div class="lbl">Rasmni qutiga moslang</div>
+            <div class="hint" style="margin:0 0 10px">Ramkani qutining old tomoniga toʻgʻri keltiring: ichidagi qism stikerga chiqadi. Ramkani siljiting, burchagidan tortib yoki pastdagi chiziq bilan kattalashtiring.</div>
+            <div class="labed-stage" id="labStage"><canvas id="labCanvas" width="10" height="10"></canvas><div class="labframe" id="labFrame"><span class="labtxt" id="labFrameTxt"></span><i class="grip" id="labGrip"></i></div></div>
+            <div class="labed-ctl">
+              <button class="vbtn" id="labPrev" type="button" aria-label="Oldingi rasm">‹</button>
+              <span class="viz-count" id="labCount"></span>
+              <button class="vbtn" id="labNext" type="button" aria-label="Keyingi rasm">›</button>
+              <input type="range" id="labZoom" min="10" max="100" step="1" aria-label="Ramka kattaligi">
+            </div>
+            <div class="labed-ctl">
+              <button class="btn" id="labCenter" type="button">Markazlash</button>
+              <button class="btn" id="labAll" type="button">Hammasiga qoʻllash</button>
+            </div>
+          </div>
+
+          <label class="field">
+            <span class="lbl">Qutining oʻlchami (old tomon)</span>
+            <select id="labPreset"></select>
+            <div class="row2">
+              <label><span class="hint">Eni (mm)</span><input type="number" id="labW" min="5" max="2000" step="0.5" inputmode="decimal"></label>
+              <label><span class="hint">Boʻyi (mm)</span><input type="number" id="labH" min="5" max="2000" step="0.5" inputmode="decimal"></label>
+            </div>
+            <div class="drop-actions" style="margin-top:8px">
+              <button class="btn" id="labSave" type="button">💾 Shu oʻlchamni saqlash</button>
+              <button class="btn hidden" id="labDel" type="button">🗑 Oʻchirish</button>
+            </div>
+            <div class="hint">Kinder oʻlchamlari taxminiy. <b>Qutini chizgʻich bilan oʻlchang</b> va yuqoriga yozing: bir marta saqlasangiz, keyin tanlab ishlatasiz. Pastdagi “Sinov: faqat kontur” bilan tekshirib koʻrasiz.</div>
+          </label>
+
+          <div class="row">
+            <label class="field"><span class="lbl">Zaxira (mm)</span><input type="number" id="labBleed" min="0" max="5" step="0.5" inputmode="decimal"><div class="hint">Qirqishda oq chiziq qolmasligi uchun rasm shuncha tashqariga davom etadi.</div></label>
+            <label class="field"><span class="lbl">Stikerlar orasi (mm)</span><input type="number" id="labGap" min="0" max="30" step="0.5" inputmode="decimal"></label>
+            <label class="field"><span class="lbl">Varaq chetidan (mm)</span><input type="number" id="labMargin" min="0" max="30" step="0.5" inputmode="decimal"><div class="hint">Printer chetini bosa olmaydi: 5-6 mm.</div></label>
+          </div>
+          <div class="row">
+            <label class="field"><span class="lbl">Qirqish belgilari</span>
+              <select id="labMarks"><option value="ticks">Burchak chiziqchalari</option><option value="dash">Punktir kontur</option><option value="none">Belgisiz</option></select></label>
+            <label class="field"><span class="lbl">Har rasmdan nechta</span><input type="number" id="labCopies" min="1" max="500" step="1" inputmode="numeric">
+              <div class="hint"><button class="link" id="labFill" type="button">Bitta varaqni toʻldirish</button></div></label>
+            <label class="field"><span class="lbl">Burish</span>
+              <select id="labRot"><option value="auto">Avtomatik (koʻproq sigʻishi uchun)</option><option value="no">Burmaslik</option></select></label>
+          </div>
+        </div>
+
         <div class="checks">
           <label class="check" data-modes="booklet2 bookletDuplex nup2 nup4"><input type="checkbox" id="rtl"><span>Oʻngdan chapga oʻqiladigan hujjat</span></label>
           <label class="check" data-modes="nup2 nup4 cards4 cards8"><input type="checkbox" id="frame"><span>Betlar atrofiga ramka chizish</span></label>
           <label class="check" data-modes="booklet2 oddeven"><input type="checkbox" id="rev"><span>Orqa tomon fayli teskari tartibda boʻlsin<br><span class="hint">Faqat sinovda orqa tomon varaqlari teskari chiqsa yoqing.</span></span></label>
-          <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4 cards4 cards8"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
+          <label class="check" data-modes="booklet2 bookletDuplex oddeven nup2 nup4 cards4 cards8 labels"><input type="checkbox" id="test"><span>Faqat sinov: birinchi 2 varaq<br><span class="hint">Hammasini sarflashdan oldin avval shuni chiqarib koʻring.</span></span></label>
         </div>
 
         <details class="more" id="more">

@@ -17,7 +17,7 @@
   var UI = window.KBUI;
   if (UI) { UI.initTheme(); }
 
-  var entries = [], nextId = 1, masterBytes = null, masterN = 0, plan = null, busy = false, lastN = 0;
+  var planErr = false, entries = [], nextId = 1, masterBytes = null, masterN = 0, plan = null, busy = false, lastN = 0;
 
   // ---------- sozlamalarni eslab qolish ----------
   function load(k, d) { try { var v = localStorage.getItem("kb_" + k); return v === null ? d : v; } catch (e) { return d; } }
@@ -47,6 +47,7 @@
     { key: "nup4", title: "Varaqda 4 bet", sub: "qogʻoz 4 barobar kam" },
     { key: "cards4", title: "Kartochka ×4", sub: "qirqib olish, old + orqa", tag: "Yangi" },
     { key: "cards8", title: "Kartochka ×8", sub: "kichik kartochkalar", tag: "Yangi" },
+    { key: "labels", title: "Qutiga stiker", sub: "rasm qutining oʻlchamida", tag: "Yangi" },
     { key: "extract", title: "Kerakli betlar", sub: "yangi PDF qilib olish" }
   ];
   function isCards(m) { return m === "cards4" || m === "cards8"; }
@@ -116,7 +117,7 @@
       try {
         status(e.name + " oʻqilmoqda…");
         var r = await CV.toPdf(e.file, function (t) { status(e.name + ": " + t); });
-        e.bytes = r.bytes; e.pages = r.pages; e.note = r.note || ""; e.state = "ok";
+        e.bytes = r.bytes; e.pages = r.pages; e.note = r.note || ""; e.box = r.box || null; e.state = "ok";
       } catch (err) {
         e.state = "err"; e.error = (err && err.message) || "Oʻqib boʻlmadi";
       }
@@ -141,6 +142,9 @@
       status("Birlashtirilmoqda…");
       masterBytes = await CV.merge(entries.map(function (e) { return e.bytes; }));
       masterN = entries.reduce(function (s, e) { return s + e.pages; }, 0);
+      lab.boxes = {}; var bi = 0;
+      entries.forEach(function (e) { for (var q = 0; q < e.pages; q++, bi++) if (e.box && e.pages === 1) lab.boxes[bi] = e.box; });
+      lab.doc = null; lab.cache = {}; lab.crops = {}; lab.shown = -1; lab.cur = 0;
     } catch (err) {
       status(""); msg("err", "Fayllarni birlashtirib boʻlmadi: " + ((err && err.message) || ""));
       return;
@@ -191,6 +195,7 @@
     nup2: "Har varaqqa 2 ta bet sigʻadi (albom). Qogʻoz 2 marta kam ketadi.",
     cards4: "Har varaqqa 4 ta kartochka (2×2) chiqadi. Qaychi bilan qirqib olasiz, orqasida davomi boʻladi. Hujjatning har 2 beti = 1 kartochka (old va orqa).",
     cards8: "Har varaqqa 8 ta kichik kartochka (4×2, albom) chiqadi. Qaychi bilan qirqib olasiz, orqasida davomi boʻladi. Hujjatning har 2 beti = 1 kartochka. Yozuv kichik chiqadi, kartochka oʻlchamida (A7) tayyorlangan hujjat eng yaxshi.",
+    labels: "Rasm qutining old tomoni oʻlchamida chiqadi. Varaqqa imkon qadar koʻp stiker joylanadi, qolganini qaychi bilan qirqib, qutiga yopishtirasiz. Avval “Sinov: faqat kontur” ni chiqarib, oʻlchamni qutida tekshiring.",
     nup4: "Har varaqqa 4 ta bet sigʻadi. Qogʻoz 4 marta kam ketadi. Kichik yozuv uchun juda mayda boʻlishi mumkin.",
     extract: "Faqat tanlangan betlar bilan yangi PDF yasaydi."
   };
@@ -221,6 +226,13 @@
       "Avval <b>sinov</b> (2 varaq) bilan tekshiring: old va orqa tomon bir-biriga toʻgʻri tushishi kerak. Teskari chiqsa, aylantirish sozlamasini boshqasiga (Short edge ↔ Long edge) almashtiring.",
       "Punktir chiziqlar boʻyicha qaychi bilan 4 ta kartochkaga qirqing."
     ],
+    labels: [
+      "Avval <b>“Sinov: faqat kontur”</b> faylini oddiy qogʻozga chiqaring va qutiga qoʻyib koʻring: kontur qutining old tomoniga mos tushishi kerak. Mos kelmasa, oʻlchamni tuzatib qayta urinib koʻring.",
+      "Stikerlar faylini PDF dasturida oching. Chop etishda masshtab <b>100%</b> (Fit/Shrink emas) boʻlsin, oʻlchamini bilmasangiz “Actual size” ni tanlang.",
+      "Qogʻoz: oddiy, yaltiroq fotoqogʻoz yoki oʻz-oʻzidan yopishuvchi (stiker) qogʻoz. Printer sifati <b>“Yuqori / Photo”</b> boʻlsin.",
+      "Chiqqan varaqda har stikerning burchaklarida <b>qora chiziqchalar</b> bor. Qaychi bilan shu chiziqchalar orasidan qirqing.",
+      "Qirqilgan stikerni qutining old tomoniga yopishtiring."
+    ],
     cards8: [
       "Faylni PDF dasturida oching. Chop etishda masshtab <b>100%</b> (Fit/Shrink emas), yoʻnalish <b>Albom (Landscape)</b>.",
       "Avtomatik ikki tomonlama printer: <b>ikki tomonlama</b> chop etishni yoqing va <b>qisqa qirra boʻyicha aylantirish (Flip on short edge)</b> ni tanlang. Bitta fayl yetarli.",
@@ -239,7 +251,8 @@
       sides: el.sides.value, rtl: el.rtl.checked, frame: el.frame.checked, rev: el.rev.checked, test: el.test.checked,
       paper: el.paper.value, scale: el.scale.value,
       margin: el.margin.value, crop: el.crop.value, rotate: el.rotate.value, angle: el.angle.value,
-      pageNum: el.pageNum.checked, numStart: el.numStart.value, gray: el.gray.checked
+      pageNum: el.pageNum.checked, numStart: el.numStart.value, gray: el.gray.checked,
+      lab: labGet()
     };
   }
 
@@ -257,16 +270,20 @@
     plan = KB.planFor(o);
     el.preview.innerHTML = ""; el.outputs.innerHTML = ""; el.previewOut.innerHTML = ""; el.viz.innerHTML = "";
     if (plan.error) {
-      el.summary.textContent = ""; msg("err", plan.error); return;
+      el.summary.textContent = ""; msg("err", plan.error); planErr = true; return;
     }
-    if (el.msg.textContent && /xato|notoʻgʻri|boʻlishi kerak|tanlanmadi|boshlanish/.test(el.msg.textContent)) msg("", "");
+    if (planErr) { msg("", ""); planErr = false; }
 
     function stat(n, label) { return '<div class="stat"><b>' + n + "</b><span>" + label + "</span></div>"; }
     var arrow = '<div class="stat arrow">→</div>', s = stat(plan.pages.length, m === "extract" ? "bet tanlandi" : "bet");
     var orient = m === "nup4" || m === "cards4" ? "kitob" : m === "oddeven" ? "" : "albom";
-    if (isCards(m)) s += arrow + stat(plan.cards, "kartochka") + arrow + stat(plan.totalSheets, "varaq · " + o.paper + ", " + orient);
+    if (m === "labels") {
+      s = stat(plan.pages.length, "rasm") + arrow + stat(plan.items, "stiker") + arrow + stat(plan.totalSheets, "varaq · " + o.paper + ", " + (plan.label.landscape ? "albom" : "kitob"));
+    } else if (isCards(m)) s += arrow + stat(plan.cards, "kartochka") + arrow + stat(plan.totalSheets, "varaq · " + o.paper + ", " + orient);
     else if (m !== "extract") s += arrow + stat(plan.totalSheets, "varaq · " + o.paper + (orient ? ", " + orient : ""));
     var notes = [];
+    if (m === "labels") notes.push([false, "Bitta varaqqa " + plan.label.per + " ta stiker sigʻadi (" + plan.label.cols + "×" + plan.label.rows + (plan.label.rot ? ", rasm 90° burilgan" : "") + ")."]);
+    if (m === "labels" && plan.emptySlots) notes.push([false, "Oxirgi varaqda " + plan.emptySlots + " ta boʻsh joy qoladi."]);
     if (isCards(m) && plan.emptySlots) notes.push([false, "Oxirgi varaqda " + plan.emptySlots + " ta boʻsh joy qoladi."]);
     if (plan.blanks) notes.push([false, "Oxirida " + plan.blanks + " ta boʻsh bet qoʻshiladi."]);
     if (plan.sections > 1) notes.push([false, plan.sections + " qism: har qism alohida kitobcha."]);
@@ -276,6 +293,7 @@
     notes.forEach(function (n) { s += '<div class="note' + (n[0] ? " warn" : "") + '">' + n[1] + "</div>"; });
     el.summary.innerHTML = s;
     renderViz(plan, o);
+    labSync();
 
     if (plan.preview && plan.preview.length) {
       var t = '<details class="numlist"><summary>Betlar raqamlari roʻyxati</summary><table class="preview"><caption>' + (plan.previewCaption || "Varaqlar tartibi (chap | oʻng)") + '</caption><tr><th></th><th>Old tomon</th><th>Orqa tomon</th></tr>';
@@ -293,6 +311,207 @@
     });
   }
 
+  // ---------- stiker / qoplama ----------
+  var LB_BUILTIN = [
+    { id: "b:t8", n: "Kinder Chocolate T8 (8 ta), taxminiy", w: 160, h: 85 },
+    { id: "b:t4", n: "Kinder Chocolate T4 (4 ta), taxminiy", w: 85, h: 85 }
+  ];
+  var lab = { crops: {}, boxes: {}, cur: 0, doc: null, cache: {}, shown: -1, token: 0, dims: { w: 1, h: 1 } };
+  var LB = {
+    preset: $("labPreset"), w: $("labW"), h: $("labH"), bleed: $("labBleed"), gap: $("labGap"), margin: $("labMargin"),
+    marks: $("labMarks"), copies: $("labCopies"), fill: $("labFill"), rot: $("labRot"), save: $("labSave"), del: $("labDel"),
+    stage: $("labStage"), canvas: $("labCanvas"), frame: $("labFrame"), txt: $("labFrameTxt"), grip: $("labGrip"),
+    prev: $("labPrev"), next: $("labNext"), count: $("labCount"), zoom: $("labZoom"), center: $("labCenter"), all: $("labAll")
+  };
+
+  function lbUser() { try { return JSON.parse(localStorage.getItem("kb_presets") || "[]"); } catch (e) { return []; } }
+  function lbSaveUser(arr) { try { localStorage.setItem("kb_presets", JSON.stringify(arr)); } catch (e) {} }
+  function lbPresets() {
+    var list = LB_BUILTIN.map(function (p) { return p; });
+    lbUser().forEach(function (p, i) { list.push({ id: "u:" + i, n: p.n, w: p.w, h: p.h, user: true }); });
+    return list;
+  }
+  function lbFillPresets(sel) {
+    var all = lbPresets(), html = '<optgroup label="Kinder (taxminiy oʻlchamlar)">';
+    all.filter(function (p) { return !p.user; }).forEach(function (p) { html += '<option value="' + p.id + '">' + p.n + " · " + p.w + "×" + p.h + " mm</option>"; });
+    html += "</optgroup>";
+    var us = all.filter(function (p) { return p.user; });
+    if (us.length) {
+      html += '<optgroup label="Mening oʻlchamlarim">';
+      us.forEach(function (p) { html += '<option value="' + p.id + '">' + p.n.replace(/</g, "&lt;") + " · " + p.w + "×" + p.h + " mm</option>"; });
+      html += "</optgroup>";
+    }
+    html += '<option value="custom">Boshqa oʻlcham (qoʻlda kiriting)</option>';
+    LB.preset.innerHTML = html;
+    LB.preset.value = sel || "custom";
+    if (LB.preset.value !== (sel || "custom")) LB.preset.value = "custom";
+    LB.del.classList.toggle("hidden", LB.preset.value.charAt(0) !== "u");
+  }
+  function lbMatch() {
+    var w = parseFloat(LB.w.value), h = parseFloat(LB.h.value), cur = LB.preset.value, all = lbPresets(), hit = "custom";
+    all.forEach(function (p) { if (p.w === w && p.h === h && (hit === "custom" || p.id === cur)) hit = p.id; });
+    return hit;
+  }
+
+  LB.w.value = load("lab_w", "85"); LB.h.value = load("lab_h", "85");
+  LB.bleed.value = load("lab_bleed", "1.5"); LB.gap.value = load("lab_gap", "6"); LB.margin.value = load("lab_margin", "6");
+  LB.marks.value = load("lab_marks", "ticks"); LB.copies.value = load("lab_copies", "1"); LB.rot.value = load("lab_rot", "auto");
+  lbFillPresets(lbMatch());
+
+  function labGet() {
+    return {
+      w: parseFloat(LB.w.value), h: parseFloat(LB.h.value), bleed: parseFloat(LB.bleed.value) || 0, gap: parseFloat(LB.gap.value) || 0,
+      margin: parseFloat(LB.margin.value) || 0, marks: LB.marks.value, copies: parseInt(LB.copies.value, 10) || 1, rot: LB.rot.value,
+      crops: lab.crops, boxes: lab.boxes
+    };
+  }
+
+  LB.preset.addEventListener("change", function () {
+    var v = LB.preset.value;
+    if (v !== "custom") {
+      var p = lbPresets().filter(function (x) { return x.id === v; })[0];
+      if (p) { LB.w.value = p.w; LB.h.value = p.h; save("lab_w", p.w); save("lab_h", p.h); }
+    }
+    LB.del.classList.toggle("hidden", v.charAt(0) !== "u");
+    refresh();
+  });
+  ["w", "h"].forEach(function (k) {
+    LB[k].addEventListener("input", function () {
+      save("lab_" + k, LB[k].value);
+      lbFillPresets(lbMatch());
+      refresh();
+    });
+  });
+  ["bleed", "gap", "margin", "marks", "copies", "rot"].forEach(function (k) {
+    LB[k].addEventListener("input", function () { save("lab_" + k, LB[k].value); refresh(); });
+    LB[k].addEventListener("change", function () { save("lab_" + k, LB[k].value); refresh(); });
+  });
+  LB.save.addEventListener("click", function () {
+    var w = parseFloat(LB.w.value), h = parseFloat(LB.h.value);
+    if (!(w > 0 && h > 0)) { msg("err", "Avval eni va boʻyini kiriting."); return; }
+    var n = window.prompt("Bu oʻlcham uchun nom yozing (masalan: Kinder T16):", "");
+    if (!n || !n.trim()) return;
+    var arr = lbUser(); arr.push({ n: n.trim().slice(0, 40), w: w, h: h }); lbSaveUser(arr);
+    lbFillPresets("u:" + (arr.length - 1));
+    msg("ok", "Saqlandi: “" + n.trim() + "”. Keyingi safar roʻyxatdan tanlaysiz.");
+  });
+  LB.del.addEventListener("click", function () {
+    var v = LB.preset.value; if (v.charAt(0) !== "u") return;
+    var arr = lbUser(); arr.splice(parseInt(v.slice(2), 10), 1); lbSaveUser(arr);
+    lbFillPresets(lbMatch());
+  });
+  LB.fill.addEventListener("click", function () {
+    var lay = KB.labelLayout(labGet(), el.paper.value);
+    if (lay) { LB.copies.value = lay.per; save("lab_copies", lay.per); refresh(); }
+  });
+
+  // --- kadr muharriri
+  function labPages() { return plan && plan.pages ? plan.pages : []; }
+  function labAspect() { var w = parseFloat(LB.w.value), h = parseFloat(LB.h.value); return w > 0 && h > 0 ? w / h : 1; }
+  function labK() { return lab.dims.w / (labAspect() * lab.dims.h); }      // kadr balandligi = eni * K (quti nisbatida)
+  function labMaxW() { return Math.min(1, 1 / labK()); }
+  function labCrop(idx) {
+    var c = lab.crops[idx], maxW = labMaxW(), K = labK();
+    var w = c ? Math.max(0.08, Math.min(c.w, maxW)) : maxW;
+    var x = c ? c.x : (1 - w) / 2, y = c ? c.y : (1 - w * K) / 2;
+    return { x: Math.max(0, Math.min(1 - w, x)), y: Math.max(0, Math.min(1 - w * K, y)), w: w };
+  }
+  function labIdx() { var p = labPages(); return p.length ? p[Math.min(lab.cur, p.length - 1)] : -1; }
+  function labFrameUpdate() {
+    var idx = labIdx(); if (idx < 0) return;
+    var c = labCrop(idx), K = labK(), f = LB.frame.style;
+    f.left = c.x * 100 + "%"; f.top = c.y * 100 + "%"; f.width = c.w * 100 + "%"; f.height = c.w * K * 100 + "%";
+    LB.zoom.value = Math.round(c.w / labMaxW() * 100);
+    LB.txt.textContent = (parseFloat(LB.w.value) || 0) + " × " + (parseFloat(LB.h.value) || 0) + " mm";
+    LB.count.textContent = "Rasm " + (lab.cur + 1) + " / " + labPages().length;
+    LB.prev.disabled = lab.cur === 0; LB.next.disabled = lab.cur >= labPages().length - 1;
+  }
+  async function labRender(idx) {
+    var tok = ++lab.token;
+    if (!window.pdfjsLib || !masterBytes) return;
+    try {
+      if (!lab.doc) lab.doc = await window.pdfjsLib.getDocument({ data: masterBytes.slice(), isEvalSupported: false }).promise;
+      var c = lab.cache[idx];
+      if (!c) {
+        var pg = await lab.doc.getPage(idx + 1), v1 = pg.getViewport({ scale: 1 });
+        var bx = lab.boxes[idx] || { x: 0, y: 0, w: v1.width, h: v1.height };
+        var s = Math.min(900 / bx.w, 2600 / Math.max(v1.width, v1.height)), vp = pg.getViewport({ scale: s });
+        var tmp = document.createElement("canvas"); tmp.width = Math.round(vp.width); tmp.height = Math.round(vp.height);
+        var tc = tmp.getContext("2d"); tc.fillStyle = "#fff"; tc.fillRect(0, 0, tmp.width, tmp.height);
+        await pg.render({ canvasContext: tc, viewport: vp }).promise;
+        c = document.createElement("canvas"); c.width = Math.max(1, Math.round(bx.w * s)); c.height = Math.max(1, Math.round(bx.h * s));
+        c.getContext("2d").drawImage(tmp, bx.x * s, (v1.height - bx.y - bx.h) * s, bx.w * s, bx.h * s, 0, 0, c.width, c.height);
+        tmp.width = tmp.height = 1;
+        var keys = Object.keys(lab.cache); if (keys.length > 8) delete lab.cache[keys[0]];
+        lab.cache[idx] = c;
+      }
+      if (tok !== lab.token) return;
+      LB.canvas.width = c.width; LB.canvas.height = c.height;
+      LB.canvas.getContext("2d").drawImage(c, 0, 0);
+      LB.stage.style.aspectRatio = c.width + " / " + c.height;
+      lab.dims = { w: c.width, h: c.height }; lab.shown = idx;
+      labFrameUpdate();
+    } catch (err) { msg("err", "Rasmni koʻrsatib boʻlmadi: " + ((err && err.message) || err)); }
+  }
+  function labSync() {
+    if (el.mode.value !== "labels") return;
+    var pages = labPages(); if (!pages.length) return;
+    if (lab.cur >= pages.length) lab.cur = 0;
+    if (lab.shown !== pages[lab.cur]) labRender(pages[lab.cur]); else labFrameUpdate();
+  }
+  function labSet(c) { var idx = labIdx(); if (idx >= 0) { lab.crops[idx] = c; labFrameUpdate(); } }
+
+  var drag = null;
+  function rect() { return LB.stage.getBoundingClientRect(); }
+  LB.frame.addEventListener("pointerdown", function (e) {
+    if (e.target === LB.grip) return;
+    var idx = labIdx(); if (idx < 0) return;
+    drag = { mode: "move", x: e.clientX, y: e.clientY, c: labCrop(idx) };
+    LB.frame.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  LB.grip.addEventListener("pointerdown", function (e) {
+    var idx = labIdx(); if (idx < 0) return;
+    drag = { mode: "size", x: e.clientX, y: e.clientY, c: labCrop(idx) };
+    LB.grip.setPointerCapture(e.pointerId); e.preventDefault(); e.stopPropagation();
+  });
+  function onMove(e) {
+    if (!drag) return;
+    var r = rect(), dx = (e.clientX - drag.x) / r.width, dy = (e.clientY - drag.y) / r.height, K = labK(), c = drag.c;
+    if (drag.mode === "move") {
+      labSet({ x: Math.max(0, Math.min(1 - c.w, c.x + dx)), y: Math.max(0, Math.min(1 - c.w * K, c.y + dy)), w: c.w });
+    } else {
+      var w = c.w + Math.max(dx, dy / K) / 1;       // burchak boʻylab (nisbat saqlanadi)
+      w = Math.max(0.08, Math.min(w, labMaxW(), 1 - c.x, (1 - c.y) / K));
+      labSet({ x: c.x, y: c.y, w: w });
+    }
+  }
+  function onUp() { drag = null; }
+  [LB.frame, LB.grip].forEach(function (n) {
+    n.addEventListener("pointermove", onMove); n.addEventListener("pointerup", onUp); n.addEventListener("pointercancel", onUp);
+  });
+  LB.zoom.addEventListener("input", function () {
+    var idx = labIdx(); if (idx < 0) return;
+    var c = labCrop(idx), K = labK(), w = Math.max(0.08, labMaxW() * (parseInt(LB.zoom.value, 10) / 100));
+    var cx = c.x + c.w / 2, cy = c.y + c.w * K / 2;
+    labSet({ x: Math.max(0, Math.min(1 - w, cx - w / 2)), y: Math.max(0, Math.min(1 - w * K, cy - w * K / 2)), w: w });
+  });
+  LB.stage.addEventListener("wheel", function (e) {
+    var idx = labIdx(); if (idx < 0) return;
+    e.preventDefault();
+    var c = labCrop(idx), K = labK(), w = Math.max(0.08, Math.min(labMaxW(), c.w * (e.deltaY < 0 ? 0.93 : 1.07)));
+    var cx = c.x + c.w / 2, cy = c.y + c.w * K / 2;
+    labSet({ x: Math.max(0, Math.min(1 - w, cx - w / 2)), y: Math.max(0, Math.min(1 - w * K, cy - w * K / 2)), w: w });
+  }, { passive: false });
+  LB.prev.addEventListener("click", function () { if (lab.cur > 0) { lab.cur--; labSync(); } });
+  LB.next.addEventListener("click", function () { if (lab.cur < labPages().length - 1) { lab.cur++; labSync(); } });
+  LB.center.addEventListener("click", function () { var idx = labIdx(); if (idx >= 0) { delete lab.crops[idx]; labFrameUpdate(); } });
+  LB.all.addEventListener("click", function () {
+    var idx = labIdx(); if (idx < 0) return;
+    var c = labCrop(idx);
+    labPages().forEach(function (p) { lab.crops[p] = { x: c.x, y: c.y, w: c.w }; });
+    msg("ok", "Shu kadr barcha rasmlarga qoʻllandi.");
+  });
+
   // ---------- varaq ko'rsatkichi ----------
   function renderViz(p, o) {
     el.viz.innerHTML = "";
@@ -306,6 +525,10 @@
       spec = { landscape: M.landscape, cols: M.cols, rows: M.rows, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: s.front, back: p.sides === 2 ? s.back : null }; }),
         caption: "Har bir rang bitta kartochka. Punktir chiziq boʻylab qirqasiz.",
         flipHint: "Qogʻozni aylantirganda orqa tomon shunday koʻrinadi: har kartochkaning orqasi aynan oʻz oldining orqasiga tushadi." };
+    } else if (m === "labels") {
+      var ly = p.label;
+      spec = { landscape: ly.landscape, cols: ly.cols, rows: ly.rows, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: s.front, back: null }; }),
+        caption: "Har bir katak bitta stiker (raqam: rasm tartibi). Burchak chiziqchalari boʻylab qirqasiz." };
     } else if (m === "oddeven") {
       spec = { landscape: false, cols: 1, rows: 1, sheets: p.sheets.slice(0, 40).map(function (s) { return { front: [s.front], back: [s.back] }; }),
         caption: "Toq bet qogʻozning old tomoniga, juft bet orqasiga chiqadi.", flipHint: "Orqa tomonda juft bet chiqadi." };
@@ -380,7 +603,7 @@
     var label = el.previewLbl;
     el.previewBtn.disabled = true; label.textContent = "Tayyorlanmoqda…"; el.previewOut.innerHTML = "";
     try {
-      var outsToShow = isCards(o.mode) ? p2.outputs.slice(0, 1) : p2.outputs;
+      var outsToShow = (isCards(o.mode) || o.mode === "labels") ? p2.outputs.slice(0, 1) : p2.outputs;
       for (var q = 0; q < outsToShow.length; q++) {
         var out = outsToShow[q];
         var bytes = await KB.make(masterBytes, o, p2, out.key, function (t) { label.textContent = t; });

@@ -2,7 +2,7 @@
    - Kitobcha fayllari (html, css, js, rasm): avval tarmoqdan olinadi (yangilanish darrov tushadi),
      internet yoʻq boʻlsa yoki sekin boʻlsa, xotiradan ochiladi.
    - Katta kutubxonalar (oʻzgarmaydi): xotiradan. */
-var CACHE = "kitobcha-v8";
+var CACHE = "kitobcha-v9";
 var FILES = [
   "./", "index.html", "yoriqnoma.html", "style.css", "manifest.webmanifest",
   "core.js", "olddoc.js", "convert.js", "ui.js", "app.js",

@@ -118,7 +118,7 @@
     var w = img.width * s, h = img.height * s;
     var page = out.addPage([pw, ph]);
     page.drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
-    return { bytes: await out.save(), pages: 1 };
+    return { bytes: await out.save(), pages: 1, box: { x: (pw - w) / 2, y: (ph - h) / 2, w: w, h: h } };
   }
 
   // ---------- HTML -> A4 betlar -> PDF ----------
