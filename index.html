@@ -155,6 +155,7 @@
             <div class="lbl">Rasmni qutiga moslang</div>
             <div class="hint" style="margin:0 0 10px">Ramkani qutining old tomoniga toʻgʻri keltiring: ichidagi qism stikerga chiqadi. Ramkani siljiting, burchagidan tortib yoki pastdagi chiziq bilan kattalashtiring.</div>
             <div class="labed-stage" id="labStage"><canvas id="labCanvas" width="10" height="10"></canvas><div class="labframe" id="labFrame"><span class="labtxt" id="labFrameTxt"></span><i class="grip" id="labGrip"></i></div></div>
+            <div class="hint" id="labRatio" style="text-align:center;margin-top:8px"></div>
             <div class="labed-ctl">
               <button class="vbtn" id="labPrev" type="button" aria-label="Oldingi rasm">‹</button>
               <span class="viz-count" id="labCount"></span>
@@ -162,6 +163,7 @@
               <input type="range" id="labZoom" min="10" max="100" step="1" aria-label="Ramka kattaligi">
             </div>
             <div class="labed-ctl">
+              <button class="btn soft" id="labAuto" type="button">✨ Avto-kadr</button>
               <button class="btn" id="labCenter" type="button">Markazlash</button>
               <button class="btn" id="labAll" type="button">Hammasiga qoʻllash</button>
             </div>
@@ -189,8 +191,9 @@
           <div class="row">
             <label class="field"><span class="lbl">Qirqish belgilari</span>
               <select id="labMarks"><option value="ticks">Burchak chiziqchalari</option><option value="dash">Punktir kontur</option><option value="none">Belgisiz</option></select></label>
-            <label class="field"><span class="lbl">Har rasmdan nechta</span><input type="number" id="labCopies" min="1" max="500" step="1" inputmode="numeric">
-              <div class="hint"><button class="link" id="labFill" type="button">Bitta varaqni toʻldirish</button></div></label>
+            <label class="field"><span class="lbl">Har rasmdan nechta stiker</span><input type="number" id="labCopies" min="1" max="500" step="1" inputmode="numeric">
+              <div class="seg"><button class="btn" id="labOne" type="button">Faqat 1 ta</button><button class="btn soft" id="labFill" type="button">Varaqni toʻldirish</button></div>
+              <div class="hint" id="labCopiesHint"></div></label>
             <label class="field"><span class="lbl">Burish</span>
               <select id="labRot"><option value="auto">Avtomatik (koʻproq sigʻishi uchun)</option><option value="no">Burmaslik</option></select></label>
           </div>

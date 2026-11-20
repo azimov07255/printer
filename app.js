@@ -144,7 +144,7 @@
       masterN = entries.reduce(function (s, e) { return s + e.pages; }, 0);
       lab.boxes = {}; var bi = 0;
       entries.forEach(function (e) { for (var q = 0; q < e.pages; q++, bi++) if (e.box && e.pages === 1) lab.boxes[bi] = e.box; });
-      lab.doc = null; lab.cache = {}; lab.crops = {}; lab.shown = -1; lab.cur = 0;
+      lab.doc = null; lab.cache = {}; lab.crops = {}; lab.auto = {}; lab.shown = -1; lab.cur = 0;
     } catch (err) {
       status(""); msg("err", "Fayllarni birlashtirib boʻlmadi: " + ((err && err.message) || ""));
       return;
@@ -316,12 +316,12 @@
     { id: "b:t8", n: "Kinder Chocolate T8 (8 ta), taxminiy", w: 160, h: 85 },
     { id: "b:t4", n: "Kinder Chocolate T4 (4 ta), taxminiy", w: 85, h: 85 }
   ];
-  var lab = { crops: {}, boxes: {}, cur: 0, doc: null, cache: {}, shown: -1, token: 0, dims: { w: 1, h: 1 } };
+  var lab = { crops: {}, auto: {}, boxes: {}, cur: 0, doc: null, cache: {}, shown: -1, token: 0, dims: { w: 1, h: 1 } };
   var LB = {
     preset: $("labPreset"), w: $("labW"), h: $("labH"), bleed: $("labBleed"), gap: $("labGap"), margin: $("labMargin"),
     marks: $("labMarks"), copies: $("labCopies"), fill: $("labFill"), rot: $("labRot"), save: $("labSave"), del: $("labDel"),
     stage: $("labStage"), canvas: $("labCanvas"), frame: $("labFrame"), txt: $("labFrameTxt"), grip: $("labGrip"),
-    prev: $("labPrev"), next: $("labNext"), count: $("labCount"), zoom: $("labZoom"), center: $("labCenter"), all: $("labAll")
+    ratio: $("labRatio"), one: $("labOne"), hint: $("labCopiesHint"), autoBtn: $("labAuto"), prev: $("labPrev"), next: $("labNext"), count: $("labCount"), zoom: $("labZoom"), center: $("labCenter"), all: $("labAll")
   };
 
   function lbUser() { try { return JSON.parse(localStorage.getItem("kb_presets") || "[]"); } catch (e) { return []; } }
@@ -359,6 +359,7 @@
   lbFillPresets(lbMatch());
 
   function labGet() {
+    labSyncAuto();
     return {
       w: parseFloat(LB.w.value), h: parseFloat(LB.h.value), bleed: parseFloat(LB.bleed.value) || 0, gap: parseFloat(LB.gap.value) || 0,
       margin: parseFloat(LB.margin.value) || 0, marks: LB.marks.value, copies: parseInt(LB.copies.value, 10) || 1, rot: LB.rot.value,
@@ -400,10 +401,49 @@
     var arr = lbUser(); arr.splice(parseInt(v.slice(2), 10), 1); lbSaveUser(arr);
     lbFillPresets(lbMatch());
   });
+  LB.one.addEventListener("click", function () { LB.copies.value = 1; save("lab_copies", 1); refresh(); });
   LB.fill.addEventListener("click", function () {
     var lay = KB.labelLayout(labGet(), el.paper.value);
     if (lay) { LB.copies.value = lay.per; save("lab_copies", lay.per); refresh(); }
   });
+
+  // --- qutini avtomatik aniqlash (chetlardagi keskin oʻzgarishlar boʻyicha)
+  function labDetect(c) {
+    var k = Math.min(1, 400 / Math.max(c.width, c.height)), w = Math.max(8, Math.round(c.width * k)), h = Math.max(8, Math.round(c.height * k));
+    var t = document.createElement("canvas"); t.width = w; t.height = h;
+    var g = t.getContext("2d"); g.drawImage(c, 0, 0, w, h);
+    var d = g.getImageData(0, 0, w, h).data, i, x, y, ring = [[], [], []];
+    // fon rangi: rasmning chetidagi pikselar medianasi
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      if (x > 2 && x < w - 3 && y > 2 && y < h - 3) { x = w - 3; continue; }
+      i = 4 * (y * w + x); ring[0].push(d[i]); ring[1].push(d[i + 1]); ring[2].push(d[i + 2]);
+    }
+    function med(a) { a.sort(function (p, q) { return p - q; }); return a[a.length >> 1]; }
+    var br = med(ring[0]), bg = med(ring[1]), bb = med(ring[2]);
+    var cs = new Int32Array(w), rs = new Int32Array(h), T2 = 25 * 25;
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      i = 4 * (y * w + x);
+      var dr = d[i] - br, dg = d[i + 1] - bg, db = d[i + 2] - bb;
+      if (dr * dr + dg * dg + db * db > T2) { cs[x]++; rs[y]++; }
+    }
+    var minC = Math.max(3, h * 0.04), minR = Math.max(3, w * 0.04), x0 = 0, x1 = w - 1, y0 = 0, y1 = h - 1;
+    while (x0 < w && cs[x0] < minC) x0++;
+    while (x1 > 0 && cs[x1] < minC) x1--;
+    while (y0 < h && rs[y0] < minR) y0++;
+    while (y1 > 0 && rs[y1] < minR) y1--;
+    if (x1 - x0 < w * 0.15 || y1 - y0 < h * 0.15) return null;
+    return { x0: x0 / w, x1: (x1 + 1) / w, y0: y0 / h, y1: (y1 + 1) / h, W: c.width, H: c.height, on: true };
+  }
+  // quti chegaralari + stiker nisbati -> kadr (qutining ichiga sigʻadigan, markazlangan)
+  function labFromBox(a, aspect) {
+    var bw = (a.x1 - a.x0) * a.W, bh = (a.y1 - a.y0) * a.H, cx = (a.x0 + a.x1) / 2 * a.W, cy = (a.y0 + a.y1) / 2 * a.H;
+    var fw = Math.min(bw, bh * aspect), fh = fw / aspect;
+    return { x: Math.max(0, (cx - fw / 2) / a.W), y: Math.max(0, (cy - fh / 2) / a.H), w: Math.min(1, fw / a.W) };
+  }
+  function labSyncAuto() {
+    var asp = labAspect();
+    Object.keys(lab.auto).forEach(function (k) { var a = lab.auto[k]; if (a && a.on) lab.crops[k] = labFromBox(a, asp); });
+  }
 
   // --- kadr muharriri
   function labPages() { return plan && plan.pages ? plan.pages : []; }
@@ -422,7 +462,13 @@
     var c = labCrop(idx), K = labK(), f = LB.frame.style;
     f.left = c.x * 100 + "%"; f.top = c.y * 100 + "%"; f.width = c.w * 100 + "%"; f.height = c.w * K * 100 + "%";
     LB.zoom.value = Math.round(c.w / labMaxW() * 100);
-    LB.txt.textContent = (parseFloat(LB.w.value) || 0) + " × " + (parseFloat(LB.h.value) || 0) + " mm";
+    LB.txt.textContent = (parseFloat(LB.w.value) || 0) + " × " + (parseFloat(LB.h.value) || 0) + " mm" + (lab.auto[idx] && lab.auto[idx].on ? " · avto" : "");
+    var ab = lab.auto[idx];
+    if (ab) {
+      var rr = ((ab.x1 - ab.x0) * ab.W) / ((ab.y1 - ab.y0) * ab.H), ra = labAspect(), df = Math.abs(rr / ra - 1);
+      LB.ratio.textContent = "Rasmdagi quti nisbati ≈ " + rr.toFixed(2) + " (eni ÷ boʻyi), kiritilgan oʻlchamniki " + ra.toFixed(2) + "." +
+        (df > 0.06 ? " Farq bor: stiker chetlari biroz kesiladi. Quti oʻlchamini tekshiring." : " Mos.");
+    } else LB.ratio.textContent = "";
     LB.count.textContent = "Rasm " + (lab.cur + 1) + " / " + labPages().length;
     LB.prev.disabled = lab.cur === 0; LB.next.disabled = lab.cur >= labPages().length - 1;
   }
@@ -446,20 +492,24 @@
         lab.cache[idx] = c;
       }
       if (tok !== lab.token) return;
+      if (lab.auto[idx] === undefined && !lab.crops[idx]) { try { lab.auto[idx] = labDetect(c); } catch (e) { lab.auto[idx] = null; } }
       LB.canvas.width = c.width; LB.canvas.height = c.height;
       LB.canvas.getContext("2d").drawImage(c, 0, 0);
       LB.stage.style.aspectRatio = c.width + " / " + c.height;
       lab.dims = { w: c.width, h: c.height }; lab.shown = idx;
-      labFrameUpdate();
+      labSyncAuto(); labFrameUpdate();
     } catch (err) { msg("err", "Rasmni koʻrsatib boʻlmadi: " + ((err && err.message) || err)); }
   }
   function labSync() {
     if (el.mode.value !== "labels") return;
+    var lay = KB.labelLayout(labGet(), el.paper.value), cp = parseInt(LB.copies.value, 10) || 1;
+    LB.fill.textContent = lay ? "Varaqni toʻldirish (" + lay.per + " ta)" : "Varaqni toʻldirish";
+    LB.hint.textContent = cp === 1 ? "Hozir: har rasmdan faqat 1 ta stiker chiqadi." : "Hozir: har rasmdan " + cp + " ta stiker chiqadi.";
     var pages = labPages(); if (!pages.length) return;
     if (lab.cur >= pages.length) lab.cur = 0;
     if (lab.shown !== pages[lab.cur]) labRender(pages[lab.cur]); else labFrameUpdate();
   }
-  function labSet(c) { var idx = labIdx(); if (idx >= 0) { lab.crops[idx] = c; labFrameUpdate(); } }
+  function labSet(c) { var idx = labIdx(); if (idx >= 0) { lab.crops[idx] = c; if (lab.auto[idx]) lab.auto[idx].on = false; labFrameUpdate(); } }
 
   var drag = null;
   function rect() { return LB.stage.getBoundingClientRect(); }
@@ -504,11 +554,18 @@
   }, { passive: false });
   LB.prev.addEventListener("click", function () { if (lab.cur > 0) { lab.cur--; labSync(); } });
   LB.next.addEventListener("click", function () { if (lab.cur < labPages().length - 1) { lab.cur++; labSync(); } });
-  LB.center.addEventListener("click", function () { var idx = labIdx(); if (idx >= 0) { delete lab.crops[idx]; labFrameUpdate(); } });
+  LB.center.addEventListener("click", function () { var idx = labIdx(); if (idx >= 0) { delete lab.crops[idx]; if (lab.auto[idx]) lab.auto[idx].on = false; labFrameUpdate(); } });
+  LB.autoBtn.addEventListener("click", function () {
+    var idx = labIdx(), c = lab.cache[idx]; if (idx < 0 || !c) return;
+    var a = null; try { a = labDetect(c); } catch (e) {}
+    lab.auto[idx] = a;
+    if (!a) { msg("warn", "Qutini avtomatik aniqlab boʻlmadi. Ramkani qoʻlda moslang."); return; }
+    labSyncAuto(); labFrameUpdate();
+  });
   LB.all.addEventListener("click", function () {
     var idx = labIdx(); if (idx < 0) return;
     var c = labCrop(idx);
-    labPages().forEach(function (p) { lab.crops[p] = { x: c.x, y: c.y, w: c.w }; });
+    labPages().forEach(function (p) { lab.crops[p] = { x: c.x, y: c.y, w: c.w }; if (lab.auto[p]) lab.auto[p].on = false; });
     msg("ok", "Shu kadr barcha rasmlarga qoʻllandi.");
   });
 

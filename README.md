@@ -12,7 +12,7 @@ PDF, Word (.docx), rasm va matn fayllarini kitobcha va boshqa usullarda chiqaris
 - Oddiy hujjatni qoʻlda ikki tomonlama chiqarish: toq va juft betlar
 - Har varaqda 2 yoki 4 bet
 - Kartochkalar: varaqda 4 ta (2×2, A6) yoki 8 ta (4×2, A7), qaychi bilan qirqib olish uchun. Hujjatning har 2 beti bitta kartochka (old va orqa), ikki tomonlama chiqarishda orqasi toʻgʻri tushadi, qirqish uchun punktir chiziqlar chiziladi
-- Qutiga stiker: rasmni qutining haqiqiy oʻlchamida (mm) chiqarish, varaqqa imkon qadar koʻp joylash, qirqish belgilari, zaxira, kadr muharriri, oʻlchamlarni nom bilan saqlash va “Sinov: faqat kontur”
+- Qutiga stiker: rasmni qutining haqiqiy oʻlchamida (mm) chiqarish, varaqqa imkon qadar koʻp joylash, qirqish belgilari, zaxira, kadr muharriri (qutini rasmdan avtomatik topadi), oʻlchamlarni nom bilan saqlash va “Sinov: faqat kontur”
 - Faqat tanlangan betlarni yangi PDF qilib olish
 
 **Interfeys:** varaq qanday chiqishi rasmda koʻrinadi (old va orqa tomonni aylantirib koʻrish mumkin), yorugʻ/qorongʻi rejim, namuna hujjat bilan sinab koʻrish va oddiy tilda yozilgan rasmli **Yoʻriqnoma** (`yoriqnoma.html`). Ilova internet bor paytda oʻzi yangilanadi.
@@ -48,7 +48,7 @@ Kutubxonalar loyiha ichida: pdf-lib 1.17.1 (MIT), mammoth 1.8.0 (BSD-2), html2ca
 
 ## Yangilash
 
-Fayllarni oʻzgartirgach, `sw.js` ichidagi `CACHE = "kitobcha-v9"` raqamini oshiring (masalan, `kitobcha-v10`). Ilova fayllari "avval tarmoq" usulida olinadi, shuning uchun internet bor paytda yangilanish bitta qayta ochishda tushadi va ekranda "Yangi versiya tayyor!" xabari chiqadi. Eski (v4 va undan oldingi) nusxa oʻrnatilgan qurilmalarda yangi versiyaga oʻtish uchun ilovani ikki marta qayta ochish kerak.
+Fayllarni oʻzgartirgach, `sw.js` ichidagi `CACHE = "kitobcha-v10"` raqamini oshiring (masalan, `kitobcha-v11`). Ilova fayllari "avval tarmoq" usulida olinadi, shuning uchun internet bor paytda yangilanish bitta qayta ochishda tushadi va ekranda "Yangi versiya tayyor!" xabari chiqadi. Eski (v4 va undan oldingi) nusxa oʻrnatilgan qurilmalarda yangi versiyaga oʻtish uchun ilovani ikki marta qayta ochish kerak.
 
 Yoʻriqnomadagi skrinshotlarni yangilash: `NODE_PATH=$(npm root -g) node tools/shots.js && python3 tools/to_webp.py`.
 
